@@ -1,91 +1,31 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class CardsContller : MonoBehaviour
 {
-    /// <summary>トランプのプレファブ</summary>
+    [SerializeField] Distribute distribute;
+    /// <summary>トランプ生成するときの元オブジェクト</summary>
     [SerializeField] List<GameObject> cardsPrefab = new List<GameObject>();
-    [SerializeField] Vector3 start;   //最初のカードの位置
+    [SerializeField] List<GameObject> player;
+    [SerializeField] Shuffle shuffle;
 
-    Distribute distribute;
-    Shuffle shuffle;
-
-    List<GameObject> cardsObject = new List<GameObject>();
-    /// <summary>カード情報</summary>
-    List<Card> cardsInformation = new List<Card>();
-    /// <summary>カードの内部番号</summary>
+    /// <summary>トランプ情報(スート、番号、ジョーカーか否か)</summary>
+    List<CardInformation> cardsInformation = new List<CardInformation>();
+    /// <summary>cardsInformationのindexに入れる</summary>
     List<int> cardsNumber;
-    public float cardOffset;   //カードをずらす幅
 
     void Awake()
     {
         CardsCreate();
-        GetScripts();
     }
 
-    /// <summary>
-    /// カードの生成
-    /// </summary>
+    //トランプオブジェクト生成
     void CardsCreate()
-    {
-        for (int i = 0; i < 53; i++)   //カードオブジェクト生成
-        {
-            cardsObject.Add(Instantiate(cardsPrefab[i], Vector3.zero, Quaternion.identity));
-
-            if (i == 0) cardsInformation.Add(new Card("Joker", null, true));
-        }
-
-        for (int i = 0; i < 4; i++)   //カード情報生成
-        {
-            switch (i)
-            {
-                case 0:
-                    Suit("♣");
-                    break;
-                case 1:
-                    Suit("♦");
-                    break;
-                case 2:
-                    Suit("♥");
-                    break;
-                case 3:
-                    Suit("♠");
-                    break;
-            }
-        }
-    }
-
-    void GetScripts()
-    {
-        distribute = gameObject.GetComponent<Distribute>();
-        shuffle = gameObject.GetComponent<Shuffle>();
-    }
-
-    void Suit(string suit)
-    {
-        for (int i = 1; i < 14; i++)
-        {
-            cardsInformation.Add(new Card(suit, i, false));
-        }
-    }
-
-    /// <summary>
-    /// シャッフルが要求された時の処理
-    /// </summary>
-    public void RequestShuffle()
-    {
-        cardsNumber = shuffle.CardShuffle(cardsNumber);
-        Generate();
-    }
-
-    /// <summary>
-    /// カードの並べ替えを行う関数
-    /// </summary>
-    void Generate()
     {
         for (int i = 0; i < 53; i++)
         {
-            cardsObject[cardsNumber[i]].transform.position = start + new Vector3(cardOffset, 0.001f, 0) * i;
+            cardsInformation.Add(Instantiate(cardsPrefab[i]).GetComponent<CardInformation>());
         }
     }
 
@@ -94,9 +34,22 @@ public class CardsContller : MonoBehaviour
     /// </summary>
     public void RequestDistribute()
     {
-        for (int i = 0; i < 53; i++) 
+        for (int index = 0; index < 53; index++)
         {
-            distribute.CardDistribute(i, cardsObject[cardsNumber[i]]);
+            distribute.CardDistribute(cardsInformation[cardsNumber[index]]);
         }
+
+        for (int playerIndex = 0; playerIndex < player.Count; playerIndex++)
+        {
+            player[playerIndex].SetActive(true);
+        }
+    }
+
+    /// <summary>
+    /// シャッフルが要求された時の処理
+    /// </summary>
+    public void RequestShuffle()
+    {
+        cardsNumber = shuffle.CardShuffle();
     }
 }

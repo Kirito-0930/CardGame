@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1025345205497286971}
   - component: {fileID: 1025345205497286949}
   - component: {fileID: 1025345205497286948}
+  - component: {fileID: 615764080334739305}
   m_Layer: 0
   m_Name: PlayingCards_Spade11
   m_TagString: Untagged
@@ -26,7 +27,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1025345205497286970}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.8999999, y: 0.017, z: -1.1}
+  m_LocalPosition: {x: 0, y: 0.01, z: 0}
   m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -79,3 +80,18 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!114 &615764080334739305
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1025345205497286970}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3f8c33276b0ba94d83e52471280b8c5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  suit: "\u2660"
+  number: 11
+  isJoker: 0

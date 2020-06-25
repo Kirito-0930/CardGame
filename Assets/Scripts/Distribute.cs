@@ -35,9 +35,9 @@ public class Distribute : MonoBehaviour
         }
     }
 
-    //各プレイヤーのListにAddしていく
-    void HandOver(CardInformation cardCardInformation, GameObject player)
+    //各プレイヤーの手札用ListにAddしていく
+    void HandOver(CardInformation cardCardInformation, GameObject players)
     {
-        player.GetComponent<PlayerContller>().haveCard.Add(cardCardInformation);
+        players.GetComponent<PlayerContller>().haveCard.Add(cardCardInformation);
     }
 }

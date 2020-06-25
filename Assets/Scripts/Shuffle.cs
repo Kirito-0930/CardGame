@@ -21,9 +21,9 @@ public class Shuffle : MonoBehaviour
         while (indexCount > 1)   //トランプ入れ替えの処理
         {
             indexCount--;
-            int ri = Random.Range(0, indexCount + 1);
-            int tmp = cardsIndex[ri];
-            cardsIndex[ri] = cardsIndex[indexCount];
+            int random = Random.Range(0, indexCount + 1);
+            int tmp = cardsIndex[random];
+            cardsIndex[random] = cardsIndex[indexCount];
             cardsIndex[indexCount] = tmp;
         }
 

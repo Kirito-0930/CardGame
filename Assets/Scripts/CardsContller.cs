@@ -20,7 +20,7 @@ public class CardsContller : MonoBehaviour
         CardsCreate();
     }
 
-    //トランプオブジェクト生成
+    //トランプ情報(スート、番号、ジョーカーか否か)の生成
     void CardsCreate()
     {
         for (int i = 0; i < 53; i++)
@@ -29,9 +29,7 @@ public class CardsContller : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// プレイヤーにトランプを配る時の処理
-    /// </summary>
+    //プレイヤーにトランプを配る時の処理
     public void RequestDistribute()
     {
         for (int index = 0; index < 53; index++)
@@ -45,9 +43,7 @@ public class CardsContller : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// シャッフルが要求された時の処理
-    /// </summary>
+    //シャッフルボタンが押された時の処理
     public void RequestShuffle()
     {
         cardsNumber = shuffle.CardShuffle();

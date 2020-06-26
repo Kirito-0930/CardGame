@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CardsContller : MonoBehaviour
 {
     [SerializeField] Distribute distribute;
+    [SerializeField] GameObject CardsSetPos;
     /// <summary>トランプ生成するときの元オブジェクト</summary>
     [SerializeField] List<GameObject> cardsPrefab = new List<GameObject>();
     [SerializeField] List<GameObject> player;
@@ -26,6 +27,9 @@ public class CardsContller : MonoBehaviour
         for (int i = 0; i < 53; i++)
         {
             cardsInformation.Add(Instantiate(cardsPrefab[i]).GetComponent<CardInformation>());
+            cardsInformation[i].transform.rotation = Quaternion.Euler(180, 0, 0);   //トランプを裏側にしておく
+            cardsInformation[i].transform.position = CardsSetPos.transform.position;
+            CardsSetPos.transform.position += new Vector3(0, .002f, 0);
         }
     }
 
@@ -46,6 +50,31 @@ public class CardsContller : MonoBehaviour
     //シャッフルボタンが押された時の処理
     public void RequestShuffle()
     {
-        cardsNumber = shuffle.CardShuffle();
+        StartCoroutine(ShuffleMotion());           //見た目のトランプシャッフル
+        cardsNumber = shuffle.CardShuffle();   //内部的なトランプシャッフル
+    }
+
+    IEnumerator ShuffleMotion()
+    {
+        for (int i = 0; i < 53; i++)
+        {
+            cardsInformation[i].originalPos = cardsInformation[i].transform.position;
+
+            cardsInformation[i].shufflePos = i % 2 == 0 ? new Vector3(-0.3f, 2f + .002f * i, 0) 
+                                                                             : new Vector3(0.3f, 2f + .002f * (i - 1), 0);   //トランプデッキを二つに分ける
+            cardsInformation[i].isShuffleStart = true;
+        }
+
+        yield return new WaitForSeconds(2.5f);
+
+        for (int i = 0; i < 53; i++)
+        {
+            cardsInformation[i].isShuffleStart = false;
+
+            yield return new WaitForSeconds(0.05f);
+
+            if (i % 2 == 0) cardsInformation[i].isShuffleEnd = true;
+            else cardsInformation[i].isShuffleEnd = true;
+        }
     }
 }

@@ -1,17 +1,114 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class PlayerContller : MonoBehaviour
 {
+    [SerializeField] Camera playerCamera;
+    [SerializeField] GameObject startpos;   //手札の基準ポジション
+    [SerializeField] Transform discardPos;
+
+    [SerializeField] float offset;                  //手札をずらす幅
+
+    public List<CardInformation> haveCard 
+        = new List<CardInformation>();     //このListにトランプが渡される
+
+    List<CardInformation> discards = new List<CardInformation>();
+    Transform obj;
+
+    int defaultLayer = 1;
 
     void Start()
     {
-        
+        for (int i = 0; i < haveCard.Count; i++)
+        {
+            SameFristCardsCheck(i);
+        }
+
+        CardsLineUp();
     }
 
     void Update()
     {
-        
+        GetCardCheck();
+        SelectCardsObject();
+    }
+
+    //手元に残ったトランプを並べる
+    void CardsLineUp()
+    {
+        for (int i = 0; i < haveCard.Count; i++)
+        {
+            haveCard[i].transform.parent = startpos.transform;
+            haveCard[i].transform.position = startpos.transform.position + new Vector3(offset * i, 0.001f * i, 0);
+            haveCard[i].transform.eulerAngles = startpos.transform.eulerAngles;
+        }
+    }
+
+    //TODO:相手のトランプを取ってきたとき同じ数字があるか確認するための関数
+    void GetCardCheck()
+    {
+
+    }
+
+    //配られたトランプの番号が揃っているか調べる
+    void SameFristCardsCheck(int checkCardIndex)
+    {
+        for (int i = checkCardIndex + 1; i < haveCard.Count; i++)
+        {
+            if (haveCard[checkCardIndex]._number == haveCard[i]._number)
+            {
+                ThrowAwayCards(i, checkCardIndex);
+                SameFristCardsCheck(checkCardIndex);
+            }
+        }
+    }
+
+    //選んでいるトランプにアウトラインをつける
+    void SelectCardsObject()
+    {
+        Ray ray = playerCamera.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit))   //マウスポジションからレイを飛ばして当たったオブジェクトにアウトラインをつける
+        {
+            if (obj == null)
+            {
+                obj = hit.transform;
+                obj.gameObject.layer = LayerMask.NameToLayer("Outline");
+            }
+            else if (obj != hit.transform)
+            {
+                obj.gameObject.layer = defaultLayer;
+                obj = hit.transform;
+                obj.gameObject.layer = LayerMask.NameToLayer("Outline");
+            }
+        }
+        else
+        {
+            if (obj != null)
+            {
+                obj.gameObject.layer = defaultLayer;
+                obj = null;
+            }
+        }
+    }
+
+    //トランプの番号がそろったら捨てる
+    void ThrowAwayCards(int myCardIndex, int checkCardIndex)
+    {
+        Random.InitState(System.DateTime.Now.Millisecond);
+
+        //自分が持っているトランプ
+        discards.Add(haveCard[myCardIndex]);
+        haveCard.RemoveAt(myCardIndex);
+        discards.Last().transform.position = discardPos.position;
+        discards.Last().transform.rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
+
+        //相手からとってきた(配札時にかぶっていた)トランプ
+        discards.Add(haveCard[checkCardIndex]);
+        haveCard.RemoveAt(checkCardIndex);
+        discards.Last().transform.position = discardPos.position;
+        discards.Last().transform.rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
     }
 }

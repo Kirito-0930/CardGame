@@ -2,38 +2,49 @@
 
 public class Distribute : MonoBehaviour
 {
-    [SerializeField] GameObject spwan1;
-    [SerializeField] GameObject spwan2;
-    [SerializeField] GameObject spwan3;
-    [SerializeField] GameObject spwan4;
-    public float cardOffset;   //カードをずらす幅
+    [SerializeField] GameObject player;
+    [SerializeField] GameObject cpu1;
+    [SerializeField] GameObject cpu2;
+    [SerializeField] GameObject cpu3;
+
+    int count = 0;
 
     /// <summary>
-    /// カードを配る
+    /// どのプレイヤーに配るか分ける
     /// </summary>
-    /// <param name="i">カード番号</param>
-    /// <param name="cardObject">カード番号のトランプオブジェクト</param>
-    public void CardDistribute(int i, GameObject cardObject)
+    /// <param name="cardCardInformation">i枚目のトランプオブジェクト</param>
+    public void CardDistribute(CardInformation cardCardInformation)
     {
-        switch (i % 4) {
+        switch (count % 4) {
             case 0:
-                Spwans(i, cardObject, spwan1);
+                HandOver(cardCardInformation, player);
+                count++;
                 break;
             case 1:
-                Spwans(i, cardObject, spwan2);
+                HandOver(cardCardInformation, cpu1);
+                count++;
                 break;
             case 2:
-                Spwans(i, cardObject, spwan3);
+                HandOver(cardCardInformation, cpu2);
+                count++;
                 break;
             case 3:
-                Spwans(i, cardObject, spwan4);
+                HandOver(cardCardInformation, cpu3);
+                count = 0;
                 break;
         }
     }
 
-    void Spwans(int i,GameObject cardObject, GameObject spwan)
+    //各プレイヤーの手札用ListにAddしていく
+    void HandOver(CardInformation cardCardInformation, GameObject players)
     {
-        cardObject.transform.position = spwan.transform.position + new Vector3(cardOffset, 0.001f, 0) * i;
-        cardObject.transform.parent = spwan.transform;
+        if (players.GetComponent<PlayerContller>() != null)
+        {
+            players.GetComponent<PlayerContller>().haveCard.Add(cardCardInformation);
+        }
+        else 
+        {
+            players.GetComponent<CPUContller>().haveCard.Add(cardCardInformation);
+        }
     }
 }

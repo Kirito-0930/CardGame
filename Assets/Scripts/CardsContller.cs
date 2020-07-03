@@ -1,102 +1,77 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CardsContller : MonoBehaviour
 {
-    /// <summary>トランプのプレファブ</summary>
+    [SerializeField] Distribute distribute;
+    [SerializeField] GameObject camera;
+    /// <summary>トランプ生成するときの元オブジェクト</summary>
     [SerializeField] List<GameObject> cardsPrefab = new List<GameObject>();
-    [SerializeField] Vector3 start;   //最初のカードの位置
+    [SerializeField] List<GameObject> players;
+    [SerializeField] Shuffle shuffle;
+    [SerializeField] Transform cardsSetPos;
 
-    Distribute distribute;
-    Shuffle shuffle;
-
-    List<GameObject> cardsObject = new List<GameObject>();
-    /// <summary>カード情報</summary>
-    List<Card> cardsInformation = new List<Card>();
-    /// <summary>カードの内部番号</summary>
+    /// <summary>トランプ情報(スート、番号、ジョーカーか否か)を入れる</summary>
+    List<CardInformation> cardsInformation = new List<CardInformation>();
+    /// <summary>cardsInformationのindexに入れる</summary>
     List<int> cardsNumber;
-    public float cardOffset;   //カードをずらす幅
 
-    void Awake()
-    {
-        CardsCreate();
-        GetScripts();
-    }
-
-    /// <summary>
-    /// カードの生成
-    /// </summary>
-    void CardsCreate()
-    {
-        for (int i = 0; i < 53; i++)   //カードオブジェクト生成
-        {
-            cardsObject.Add(Instantiate(cardsPrefab[i], Vector3.zero, Quaternion.identity));
-
-            if (i == 0) cardsInformation.Add(new Card("Joker", null, true));
-        }
-
-        for (int i = 0; i < 4; i++)   //カード情報生成
-        {
-            switch (i)
-            {
-                case 0:
-                    Suit("♣");
-                    break;
-                case 1:
-                    Suit("♦");
-                    break;
-                case 2:
-                    Suit("♥");
-                    break;
-                case 3:
-                    Suit("♠");
-                    break;
-            }
-        }
-    }
-
-    void GetScripts()
-    {
-        distribute = gameObject.GetComponent<Distribute>();
-        shuffle = gameObject.GetComponent<Shuffle>();
-    }
-
-    void Suit(string suit)
-    {
-        for (int i = 1; i < 14; i++)
-        {
-            cardsInformation.Add(new Card(suit, i, false));
-        }
-    }
-
-    /// <summary>
-    /// シャッフルが要求された時の処理
-    /// </summary>
-    public void RequestShuffle()
-    {
-        cardsNumber = shuffle.CardShuffle(cardsNumber);
-        Generate();
-    }
-
-    /// <summary>
-    /// カードの並べ替えを行う関数
-    /// </summary>
-    void Generate()
+    //トランプの生成
+    public void CardsCreate()
     {
         for (int i = 0; i < 53; i++)
         {
-            cardsObject[cardsNumber[i]].transform.position = start + new Vector3(cardOffset, 0.001f, 0) * i;
+            cardsInformation.Add(Instantiate(cardsPrefab[i]).GetComponent<CardInformation>());
+            cardsInformation[i].transform.rotation = Quaternion.Euler(180, 0, 0);   //トランプを裏側にしておく
+            cardsInformation[i].transform.position = cardsSetPos.position;
+            cardsSetPos.position += new Vector3(0, .002f, 0);
         }
     }
 
-    /// <summary>
-    /// プレイヤーにトランプを配る時の処理
-    /// </summary>
+    //各プレイヤーにトランプを配る            TODO:シャッフルしたら自動でトランプを配るようにする
     public void RequestDistribute()
     {
-        for (int i = 0; i < 53; i++) 
+        for (int index = 0; index < 53; index++)
         {
-            distribute.CardDistribute(i, cardsObject[cardsNumber[i]]);
+            distribute.CardDistribute(cardsInformation[cardsNumber[index]]);
+        }
+
+        for (int playerIndex = 0; playerIndex < players.Count; playerIndex++)
+        {
+            players[playerIndex].SetActive(true);
+        }
+        camera.SetActive(false);
+    }
+
+    //シャッフルボタンが押された時の処理   TODO:ゲームが開始したら自動でシャッフルするようにする
+    public void RequestShuffle()
+    {
+        StartCoroutine(ShuffleAnimation());      //見た目のトランプシャッフル
+        cardsNumber = shuffle.CardShuffle();   //内部的なトランプシャッフル
+    }
+
+    IEnumerator ShuffleAnimation()
+    {
+        for (int i = 0; i < 53; i++)
+        {
+            cardsInformation[i].originalPos = cardsInformation[i].transform.position;
+
+            cardsInformation[i].shufflePos = i % 2 == 0 ? new Vector3(-0.3f, 2f + .002f * i, 0) 
+                                                                             : new Vector3(0.3f, 2f + .002f * (i - 1), 0);   //トランプデッキを二つに分ける
+            cardsInformation[i].isShuffleFirst = true;
+        }
+
+        yield return new WaitForSeconds(2.5f);
+
+        for (int i = 0; i < 53; i++)
+        {
+            cardsInformation[i].isShuffleFirst = false;
+
+            yield return new WaitForSeconds(0.05f);
+
+            if (i % 2 == 0) cardsInformation[i].isShuffleSecond = true;
+            else cardsInformation[i].isShuffleSecond = true;
         }
     }
 }

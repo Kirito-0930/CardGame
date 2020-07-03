@@ -3,29 +3,30 @@ using UnityEngine;
 
 public class Shuffle : MonoBehaviour
 {
+    List<int> cardsIndex;
 
-    public List<int> CardShuffle(List<int> cardsNumber)
+    public List<int> CardShuffle()
     {
-        if (cardsNumber == null) cardsNumber = new List<int>();
-        else cardsNumber.Clear();
+        if (cardsIndex == null) cardsIndex = new List<int>();
+        else cardsIndex.Clear();
 
-        for (int i = 0; i < 53; i++)   //カード0番から52番までのList生成
+        for (int i = 0; i < 53; i++)
         {
-            cardsNumber.Add(i);
+            cardsIndex.Add(i);
         }
 
-        int n = cardsNumber.Count;
-        Random.InitState(System.DateTime.Now.Millisecond);   //ランダムのシード値
+        int indexCount = cardsIndex.Count;
+        Random.InitState(System.DateTime.Now.Millisecond);
 
-        while (n > 1)   //カード番号のランダム処理
+        while (indexCount > 1)   //トランプ入れ替えの処理
         {
-            n--;
-            int k = Random.Range(0, n + 1);
-            int temp = cardsNumber[k];
-            cardsNumber[k] = cardsNumber[n];
-            cardsNumber[n] = temp;
+            indexCount--;
+            int random = Random.Range(0, indexCount + 1);
+            int tmp = cardsIndex[random];
+            cardsIndex[random] = cardsIndex[indexCount];
+            cardsIndex[indexCount] = tmp;
         }
 
-        return cardsNumber;
+        return cardsIndex;
     }
 }

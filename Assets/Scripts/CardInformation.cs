@@ -19,17 +19,17 @@ public class CardInformation : MonoBehaviour
 	//山を二つに分けた時のポジションが渡される
 	public Vector3 shufflePos;
 
-	public bool isShuffleEnd = false;
-	public bool isShuffleStart = false;
+	public bool isShuffleFirst = false;
+	public bool isShuffleSecond = false;
 
 	void FixedUpdate()
 	{
-		if (isShuffleStart)
+		if (isShuffleFirst)   //山札を分けた時のポジション
 			gameObject.transform.position = Vector3.Lerp(gameObject.transform.position, shufflePos, Time.deltaTime * 3);
 
-		if (isShuffleEnd)
+		if (isShuffleSecond)   //二つの山札から合わさるときのポジション
 			gameObject.transform.position = Vector3.Lerp(gameObject.transform.position, originalPos, Time.deltaTime * 10);
 
-		if (gameObject.transform.position == originalPos) isShuffleEnd = false;   //シャッフルが終わったかどうかの判定
+		if (gameObject.transform.position == originalPos) isShuffleSecond = false;   //シャッフルが終わったかどうかの判定
 	}
 }

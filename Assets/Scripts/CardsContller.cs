@@ -5,7 +5,8 @@ using UnityEngine;
 public class CardsContller : MonoBehaviour
 {
     [SerializeField] Distribute distribute;
-    [SerializeField] GameObject CardsSetPos;
+    [SerializeField] GameObject camera;
+    [SerializeField] GameObject cardsSetPos;
     /// <summary>トランプ生成するときの元オブジェクト</summary>
     [SerializeField] List<GameObject> cardsPrefab = new List<GameObject>();
     [SerializeField] List<GameObject> player;
@@ -28,8 +29,8 @@ public class CardsContller : MonoBehaviour
         {
             cardsInformation.Add(Instantiate(cardsPrefab[i]).GetComponent<CardInformation>());
             cardsInformation[i].transform.rotation = Quaternion.Euler(180, 0, 0);   //トランプを裏側にしておく
-            cardsInformation[i].transform.position = CardsSetPos.transform.position;
-            CardsSetPos.transform.position += new Vector3(0, .002f, 0);
+            cardsInformation[i].transform.position = cardsSetPos.transform.position;
+            cardsSetPos.transform.position += new Vector3(0, .002f, 0);
         }
     }
 
@@ -45,16 +46,17 @@ public class CardsContller : MonoBehaviour
         {
             player[playerIndex].SetActive(true);
         }
+        camera.SetActive(false);
     }
 
     //シャッフルボタンが押された時の処理
     public void RequestShuffle()
     {
-        StartCoroutine(ShuffleMotion());           //見た目のトランプシャッフル
+        StartCoroutine(ShuffleAnimation());      //見た目のトランプシャッフル
         cardsNumber = shuffle.CardShuffle();   //内部的なトランプシャッフル
     }
 
-    IEnumerator ShuffleMotion()
+    IEnumerator ShuffleAnimation()
     {
         for (int i = 0; i < 53; i++)
         {
@@ -62,19 +64,19 @@ public class CardsContller : MonoBehaviour
 
             cardsInformation[i].shufflePos = i % 2 == 0 ? new Vector3(-0.3f, 2f + .002f * i, 0) 
                                                                              : new Vector3(0.3f, 2f + .002f * (i - 1), 0);   //トランプデッキを二つに分ける
-            cardsInformation[i].isShuffleStart = true;
+            cardsInformation[i].isShuffleFirst = true;
         }
 
         yield return new WaitForSeconds(2.5f);
 
         for (int i = 0; i < 53; i++)
         {
-            cardsInformation[i].isShuffleStart = false;
+            cardsInformation[i].isShuffleFirst = false;
 
             yield return new WaitForSeconds(0.05f);
 
-            if (i % 2 == 0) cardsInformation[i].isShuffleEnd = true;
-            else cardsInformation[i].isShuffleEnd = true;
+            if (i % 2 == 0) cardsInformation[i].isShuffleSecond = true;
+            else cardsInformation[i].isShuffleSecond = true;
         }
     }
 }

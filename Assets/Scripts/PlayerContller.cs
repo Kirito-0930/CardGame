@@ -1,17 +1,20 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class PlayerContller : MonoBehaviour
 {
     [SerializeField] Camera playerCamera;
     [SerializeField] GameObject startpos;   //手札の基準ポジション
+    [SerializeField] Transform discardPos;
 
     [SerializeField] float offset;                  //手札をずらす幅
 
-    Transform obj;
-
     public List<CardInformation> haveCard 
         = new List<CardInformation>();     //このListにトランプが渡される
+
+    List<CardInformation> discards = new List<CardInformation>();
+    Transform obj;
 
     int defaultLayer = 1;
 
@@ -94,7 +97,18 @@ public class PlayerContller : MonoBehaviour
     //トランプの番号がそろったら捨てる
     void ThrowAwayCards(int myCardIndex, int checkCardIndex)
     {
+        Random.InitState(System.DateTime.Now.Millisecond);
+
+        //自分が持っているトランプ
+        discards.Add(haveCard[myCardIndex]);
         haveCard.RemoveAt(myCardIndex);
+        discards.Last().transform.position = discardPos.position;
+        discards.Last().transform.rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
+
+        //相手からとってきた(配札時にかぶっていた)トランプ
+        discards.Add(haveCard[checkCardIndex]);
         haveCard.RemoveAt(checkCardIndex);
+        discards.Last().transform.position = discardPos.position;
+        discards.Last().transform.rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
     }
 }

@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class CPUContller : MonoBehaviour
 {
+    [SerializeField] DisCardsContlloer trash;
     [SerializeField] GameObject startpos;   //手札の基準ポジション
 
     [SerializeField] float offset;                  //手札をずらす幅
@@ -10,7 +11,8 @@ public class CPUContller : MonoBehaviour
     public List<CardInformation> haveCard
         = new List<CardInformation>();     //このListにトランプが渡される
 
-    List<CardInformation> discards = new List<CardInformation>();
+    public bool isMyTurn;
+    public bool isNextMtTurn;
 
     void Start()
     {
@@ -24,7 +26,7 @@ public class CPUContller : MonoBehaviour
 
     void Update()
     {
-        
+      
     }
 
     //手元に残ったトランプを並べる
@@ -54,7 +56,12 @@ public class CPUContller : MonoBehaviour
     //トランプの番号がそろったら捨てる
     void ThrowAwayCards(int myCardIndex, int checkCardIndex)
     {
+        //CPUが持っている(配札時にかぶっていた)トランプ
+        trash.CardsDump(haveCard[myCardIndex]);
         haveCard.RemoveAt(myCardIndex);
+
+        //相手からとってきた(配札時にかぶっていた)トランプ
+        trash.CardsDump(haveCard[checkCardIndex]);
         haveCard.RemoveAt(checkCardIndex);
     }
 }

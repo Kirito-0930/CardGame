@@ -1,20 +1,21 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class PlayerContller : MonoBehaviour
 {
     [SerializeField] Camera playerCamera;
+    [SerializeField] DisCardsContlloer trash;
     [SerializeField] GameObject startpos;   //手札の基準ポジション
-    [SerializeField] Transform discardPos;
 
     [SerializeField] float offset;                  //手札をずらす幅
 
     public List<CardInformation> haveCard 
         = new List<CardInformation>();     //このListにトランプが渡される
 
-    List<CardInformation> discards = new List<CardInformation>();
     Transform obj;
+
+    public bool isMyTurn;
+    public bool isNextMtTurn;
 
     int defaultLayer = 1;
 
@@ -42,6 +43,8 @@ public class PlayerContller : MonoBehaviour
             haveCard[i].transform.parent = startpos.transform;
             haveCard[i].transform.position = startpos.transform.position + new Vector3(offset * i, 0.001f * i, 0);
             haveCard[i].transform.eulerAngles = startpos.transform.eulerAngles;
+
+            haveCard[i].gameObject.tag = "Player";
         }
     }
 
@@ -72,12 +75,12 @@ public class PlayerContller : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit))   //マウスポジションからレイを飛ばして当たったオブジェクトにアウトラインをつける
         {
-            if (obj == null)
+            if (obj == null && hit.transform.gameObject.tag == "CPU")
             {
                 obj = hit.transform;
                 obj.gameObject.layer = LayerMask.NameToLayer("Outline");
             }
-            else if (obj != hit.transform)
+            else if (obj != hit.transform && hit.transform.gameObject.tag == "CPU")
             {
                 obj.gameObject.layer = defaultLayer;
                 obj = hit.transform;
@@ -99,16 +102,12 @@ public class PlayerContller : MonoBehaviour
     {
         Random.InitState(System.DateTime.Now.Millisecond);
 
-        //自分が持っているトランプ
-        discards.Add(haveCard[myCardIndex]);
+        //自分が持っている(配札時にかぶっていた)トランプ
+        trash.CardsDump(haveCard[myCardIndex]);
         haveCard.RemoveAt(myCardIndex);
-        discards.Last().transform.position = discardPos.position;
-        discards.Last().transform.rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
 
         //相手からとってきた(配札時にかぶっていた)トランプ
-        discards.Add(haveCard[checkCardIndex]);
+        trash.CardsDump(haveCard[checkCardIndex]);
         haveCard.RemoveAt(checkCardIndex);
-        discards.Last().transform.position = discardPos.position;
-        discards.Last().transform.rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
     }
 }

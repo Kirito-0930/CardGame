@@ -1,23 +1,34 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class GameView : MonoBehaviour
 {
-    CardsContller cardsContller;
+    [SerializeField] CardsContller cardsContller;
+    [SerializeField] CPUContller cpu1;
+    [SerializeField] CPUContller cpu2;
+    [SerializeField] CPUContller cpu3;
+    [SerializeField] PlayerContller player;
 
     void Awake()
     {
-        cardsContller = gameObject.GetComponent<CardsContller>();
+        StartCoroutine(StartMotion());
     }
 
     void Start()
     {
-        cardsContller.CardsCreate();
+
     }
 
     void Update()
     {
         
+    }
+
+    //ゲームを始めるまでの準備
+    IEnumerator StartMotion()
+    {
+        cardsContller.CardsCreate();
+        yield return new WaitForSeconds(1f);
+        cardsContller.Shuffle();
     }
 }

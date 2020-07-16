@@ -29,8 +29,8 @@ public class CardsContller : MonoBehaviour
         }
     }
 
-    //各プレイヤーにトランプを配る            TODO:シャッフルしたら自動でトランプを配るようにする
-    public void RequestDistribute()
+    //シャッフル完了後自動でトランプを配る
+    void Distribute()
     {
         for (int index = 0; index < 53; index++)
         {
@@ -44,8 +44,8 @@ public class CardsContller : MonoBehaviour
         camera.SetActive(false);
     }
 
-    //シャッフルボタンが押された時の処理   TODO:ゲームが開始したら自動でシャッフルするようにする
-    public void RequestShuffle()
+    //ゲームが開始したら自動でシャッフルされる
+    public void Shuffle()
     {
         StartCoroutine(ShuffleAnimation());      //見た目のトランプシャッフル
         cardsNumber = shuffle.CardShuffle();   //内部的なトランプシャッフル
@@ -73,5 +73,8 @@ public class CardsContller : MonoBehaviour
             if (i % 2 == 0) cardsInformation[i].isShuffleSecond = true;
             else cardsInformation[i].isShuffleSecond = true;
         }
+
+        yield return new WaitForSeconds(1.0f);
+        Distribute();
     }
 }

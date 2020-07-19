@@ -6,6 +6,7 @@ public class PlayerContller : MonoBehaviour
     [SerializeField] Camera playerCamera;
     [SerializeField] DisCardsContlloer trash;
     [SerializeField] GameObject startpos;   //手札の基準ポジション
+    [SerializeField] GameView gameView;
 
     [SerializeField] float offset;                  //手札をずらす幅
 
@@ -14,61 +15,61 @@ public class PlayerContller : MonoBehaviour
 
     Transform obj;
 
-    public bool isMyTurn;
-    public bool isNextMtTurn;
-
+    bool isMyTurn;
+    bool isPlayer;
     int defaultLayer = 1;
 
     void Start()
     {
-        for (int i = 0; i < haveCard.Count; i++)
-        {
-            SameFristCardsCheck(i);
-        }
-
-        CardsLineUp();
+        isPlayer = gameObject.tag == "Player" ? true : false;
     }
 
     void Update()
     {
-        GetCardCheck();
-        SelectCardsObject();
+        if (isMyTurn && isPlayer)
+            NowSelectCard();
     }
 
-    //手元に残ったトランプを並べる
+    //手元に残ったトランプを並べる P != C
     void CardsLineUp()
     {
         for (int i = 0; i < haveCard.Count; i++)
         {
             haveCard[i].transform.parent = startpos.transform;
-            haveCard[i].transform.position = startpos.transform.position + new Vector3(offset * i, 0.001f * i, 0);
+            haveCard[i].transform.localPosition = new Vector3(offset * i, 0.001f * i, 0);
             haveCard[i].transform.eulerAngles = startpos.transform.eulerAngles;
 
-            haveCard[i].gameObject.tag = "Player";
+            if(isPlayer)
+                haveCard[i].gameObject.tag = gameObject.tag;
+        }
+
+        gameView.StartCheck();
+    }
+
+    //配られたトランプの番号が揃っているか調べる P = C
+    void FristCardsSameCheck(int checkCardIndex)
+    {
+        for (int i = checkCardIndex + 1; i < haveCard.Count; i++) {
+            if (haveCard[checkCardIndex]._number == haveCard[i]._number) {
+                ThrowAwayCards(i, checkCardIndex);
+                FristCardsSameCheck(checkCardIndex);
+            }
         }
     }
 
-    //TODO:相手のトランプを取ってきたとき同じ数字があるか確認するための関数
+    //TODO:相手のトランプを取ってきたとき同じ数字があるか確認するための関数 P = C
     void GetCardCheck()
     {
 
     }
 
-    //配られたトランプの番号が揃っているか調べる
-    void SameFristCardsCheck(int checkCardIndex)
+    public void MyTurn()
     {
-        for (int i = checkCardIndex + 1; i < haveCard.Count; i++)
-        {
-            if (haveCard[checkCardIndex]._number == haveCard[i]._number)
-            {
-                ThrowAwayCards(i, checkCardIndex);
-                SameFristCardsCheck(checkCardIndex);
-            }
-        }
+        
     }
 
-    //選んでいるトランプにアウトラインをつける
-    void SelectCardsObject()
+    //選んでいるトランプにアウトラインをつける P
+    void NowSelectCard()
     {
         Ray ray = playerCamera.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
@@ -97,11 +98,27 @@ public class PlayerContller : MonoBehaviour
         }
     }
 
-    //トランプの番号がそろったら捨てる
+    //配られたトランプの整理 P != C
+    public void Prepare()
+    {
+        if (isPlayer)
+            playerCamera.gameObject.SetActive(true);
+
+        for (int i = 0; i < haveCard.Count; i++) {
+            FristCardsSameCheck(i);
+        }
+
+        CardsLineUp();
+    }
+
+    public void PreviousTurn()
+    {
+
+    }
+
+    //トランプの番号がそろったら捨てる P = C
     void ThrowAwayCards(int myCardIndex, int checkCardIndex)
     {
-        Random.InitState(System.DateTime.Now.Millisecond);
-
         //自分が持っている(配札時にかぶっていた)トランプ
         trash.CardsDump(haveCard[myCardIndex]);
         haveCard.RemoveAt(myCardIndex);

@@ -145,7 +145,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 70260792}
   m_LocalRotation: {x: -0.21643952, y: 0, z: 0, w: 0.97629607}
-  m_LocalPosition: {x: -0.2, y: 0.4, z: -0.1}
+  m_LocalPosition: {x: -0.2, y: 0.46, z: -0.128}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1921522306}
@@ -175,7 +175,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 478795586}
   m_LocalRotation: {x: -0.21643952, y: 0, z: 0, w: 0.97629607}
-  m_LocalPosition: {x: 0, y: 0.4, z: -0.03}
+  m_LocalPosition: {x: 0, y: 0.535, z: -0.093}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2043893947}
@@ -192,12 +192,12 @@ GameObject:
   - component: {fileID: 617429665}
   - component: {fileID: 617429664}
   m_Layer: 0
-  m_Name: Player
+  m_Name: Player1
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &617429664
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -213,8 +213,11 @@ MonoBehaviour:
   playerCamera: {fileID: 658469753}
   trash: {fileID: 836704928}
   startpos: {fileID: 722114476}
+  gameView: {fileID: 1214414134}
   offset: 0.1
   haveCard: []
+  isMyTurn: 0
+  isPreviousTurn: 0
 --- !u!4 &617429665
 Transform:
   m_ObjectHideFlags: 0
@@ -254,13 +257,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 630244262}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.4, z: -0.5}
+  m_LocalRotation: {x: 0, y: 0.7660445, z: 0.6427876, w: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2043893947}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -80, y: 180, z: 0}
 --- !u!108 &630244264
 Light:
   m_ObjectHideFlags: 0
@@ -270,13 +273,13 @@ Light:
   m_GameObject: {fileID: 630244262}
   m_Enabled: 1
   serializedVersion: 10
-  m_Type: 2
+  m_Type: 0
   m_Shape: 0
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
   m_Intensity: 1
-  m_Range: 5
-  m_SpotAngle: 30
-  m_InnerSpotAngle: 21.80208
+  m_Range: 3
+  m_SpotAngle: 110
+  m_InnerSpotAngle: 1
   m_CookieSize: 10
   m_Shadows:
     m_Type: 2
@@ -339,7 +342,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &658469748
 Transform:
   m_ObjectHideFlags: 0
@@ -439,12 +442,12 @@ GameObject:
   - component: {fileID: 659689330}
   - component: {fileID: 659689329}
   m_Layer: 0
-  m_Name: CPU3
-  m_TagString: Untagged
+  m_Name: Player4
+  m_TagString: CPU
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &659689329
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -454,14 +457,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 659689328}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: abbbc93bf343da6468fc86fe29a4cc38, type: 3}
+  m_Script: {fileID: 11500000, guid: f46f008037202554ba9c37674d1ed0fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerCamera: {fileID: 0}
   trash: {fileID: 836704928}
   startpos: {fileID: 2132117789}
+  gameView: {fileID: 1214414134}
   offset: 0.1
   haveCard: []
   isMyTurn: 0
+  isPreviousTurn: 0
 --- !u!4 &659689330
 Transform:
   m_ObjectHideFlags: 0
@@ -624,13 +630,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 815032781}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0, y: 0.4, z: -0.5}
+  m_LocalRotation: {x: 0, y: 0.7660445, z: 0.6427876, w: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1921522306}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -80, y: 180, z: 0}
 --- !u!108 &815032783
 Light:
   m_ObjectHideFlags: 0
@@ -640,13 +646,13 @@ Light:
   m_GameObject: {fileID: 815032781}
   m_Enabled: 1
   serializedVersion: 10
-  m_Type: 2
+  m_Type: 0
   m_Shape: 0
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
   m_Intensity: 1
-  m_Range: 5
-  m_SpotAngle: 30
-  m_InnerSpotAngle: 21.80208
+  m_Range: 3
+  m_SpotAngle: 110
+  m_InnerSpotAngle: 1
   m_CookieSize: 10
   m_Shadows:
     m_Type: 2
@@ -682,7 +688,7 @@ Light:
     serializedVersion: 2
     m_Bits: 4294967295
   m_RenderingLayerMask: 1
-  m_Lightmapping: 1
+  m_Lightmapping: 2
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
@@ -886,10 +892,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e1338af9bea8984ba3ebdfee4f57546, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 617429663}
-  cpu1: {fileID: 1921522304}
-  cpu2: {fileID: 2043893945}
-  cpu3: {fileID: 659689328}
+  player1: {fileID: 617429663}
+  player2: {fileID: 1921522304}
+  player3: {fileID: 2043893945}
+  player4: {fileID: 659689328}
 --- !u!114 &905952038
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -903,7 +909,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   distribute: {fileID: 905952037}
-  camera: {fileID: 963194225}
+  mainCamera: {fileID: 963194225}
   cardsPrefab:
   - {fileID: 397870510863733982, guid: c0bf68b0ec50d924ca8edb78d5cf4042, type: 3}
   - {fileID: 3776780259991147510, guid: 1cfd3ef2d218a844a8af2e0f38419161, type: 3}
@@ -959,10 +965,10 @@ MonoBehaviour:
   - {fileID: 6194734613792943230, guid: e0586bb52342548449eb308996fb337b, type: 3}
   - {fileID: 6028208587398885814, guid: 2e6b7567c15cfc54fa70ed2108003fef, type: 3}
   players:
-  - {fileID: 617429663}
-  - {fileID: 1921522304}
-  - {fileID: 2043893945}
-  - {fileID: 659689328}
+  - {fileID: 617429664}
+  - {fileID: 1921522305}
+  - {fileID: 2043893946}
+  - {fileID: 659689329}
   shuffle: {fileID: 905952036}
   cardsSetPos: {fileID: 1727580788}
 --- !u!1 &963194225
@@ -1092,10 +1098,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cardsContller: {fileID: 905952038}
-  cpu1: {fileID: 1921522305}
-  cpu2: {fileID: 2043893946}
-  cpu3: {fileID: 659689329}
-  player: {fileID: 617429664}
+  players:
+  - {fileID: 617429664}
+  - {fileID: 1921522305}
+  - {fileID: 2043893946}
+  - {fileID: 659689329}
 --- !u!1 &1269087591
 GameObject:
   m_ObjectHideFlags: 0
@@ -1216,13 +1223,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1765806993}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.4, z: -0.5}
+  m_LocalRotation: {x: 0, y: 0.7660445, z: 0.6427876, w: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 659689330}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -80, y: 180, z: 0}
 --- !u!108 &1765806995
 Light:
   m_ObjectHideFlags: 0
@@ -1232,13 +1239,13 @@ Light:
   m_GameObject: {fileID: 1765806993}
   m_Enabled: 1
   serializedVersion: 10
-  m_Type: 2
+  m_Type: 0
   m_Shape: 0
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
   m_Intensity: 1
-  m_Range: 5
-  m_SpotAngle: 30
-  m_InnerSpotAngle: 21.80208
+  m_Range: 3
+  m_SpotAngle: 110
+  m_InnerSpotAngle: 1
   m_CookieSize: 10
   m_Shadows:
     m_Type: 2
@@ -1295,12 +1302,12 @@ GameObject:
   - component: {fileID: 1921522306}
   - component: {fileID: 1921522305}
   m_Layer: 0
-  m_Name: CPU1
-  m_TagString: Untagged
+  m_Name: Player2
+  m_TagString: CPU
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1921522305
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1310,14 +1317,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1921522304}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: abbbc93bf343da6468fc86fe29a4cc38, type: 3}
+  m_Script: {fileID: 11500000, guid: f46f008037202554ba9c37674d1ed0fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerCamera: {fileID: 0}
   trash: {fileID: 836704928}
   startpos: {fileID: 70260792}
+  gameView: {fileID: 1214414134}
   offset: 0.1
   haveCard: []
   isMyTurn: 0
+  isPreviousTurn: 0
 --- !u!4 &1921522306
 Transform:
   m_ObjectHideFlags: 0
@@ -1345,12 +1355,12 @@ GameObject:
   - component: {fileID: 2043893947}
   - component: {fileID: 2043893946}
   m_Layer: 0
-  m_Name: CPU2
-  m_TagString: Player
+  m_Name: Player3
+  m_TagString: CPU
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &2043893946
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1360,14 +1370,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 2043893945}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: abbbc93bf343da6468fc86fe29a4cc38, type: 3}
+  m_Script: {fileID: 11500000, guid: f46f008037202554ba9c37674d1ed0fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerCamera: {fileID: 0}
   trash: {fileID: 836704928}
   startpos: {fileID: 478795586}
+  gameView: {fileID: 1214414134}
   offset: 0.1
   haveCard: []
   isMyTurn: 0
+  isPreviousTurn: 0
 --- !u!4 &2043893947
 Transform:
   m_ObjectHideFlags: 0
@@ -1408,7 +1421,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2132117789}
   m_LocalRotation: {x: -0.21643952, y: 0, z: 0, w: 0.97629607}
-  m_LocalPosition: {x: -0.2, y: 0.4, z: -0.1}
+  m_LocalPosition: {x: -0.2, y: 0.46, z: -0.128}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 659689330}

@@ -25,7 +25,7 @@ public class DisCardsContlloer : MonoBehaviour
         discards.Add(cardInformation);
         discards.Last().gameObject.tag = "Trash";
 
-        discards.Last().transform.position = transform.position + new Vector3(0, offset * count, 0); ;
+        discards.Last().transform.position = transform.position + new Vector3(0, offset * count, 0);
         discards.Last().transform.rotation = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
 
         count++;

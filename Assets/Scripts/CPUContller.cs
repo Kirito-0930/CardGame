@@ -5,6 +5,7 @@ public class CPUContller : MonoBehaviour
 {
     [SerializeField] DisCardsContlloer trash;
     [SerializeField] GameObject startpos;   //手札の基準ポジション
+    [SerializeField] GameView gameView;
 
     [SerializeField] float offset;                  //手札をずらす幅
 
@@ -26,7 +27,7 @@ public class CPUContller : MonoBehaviour
 
     void Update()
     {
-      
+        GetCardCheck();
     }
 
     //手元に残ったトランプを並べる
@@ -38,6 +39,14 @@ public class CPUContller : MonoBehaviour
             haveCard[i].transform.localPosition = startpos.transform.localPosition + new Vector3(offset * i, 0.001f * i, 0);
             haveCard[i].transform.eulerAngles = startpos.transform.eulerAngles;
         }
+
+        gameView.StartCheck();
+    }
+
+    //TODO:相手のトランプを取ってきたとき同じ数字があるか確認するための関数
+    void GetCardCheck()
+    {
+
     }
 
     //配られたトランプの番号が揃っているか調べる

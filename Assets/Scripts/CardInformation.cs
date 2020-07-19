@@ -30,6 +30,7 @@ public class CardInformation : MonoBehaviour
 		if (isShuffleSecond)   //二つの山札から合わさるときのポジション
 			gameObject.transform.position = Vector3.Lerp(gameObject.transform.position, originalPos, Time.deltaTime * 10);
 
-		if (gameObject.transform.position == originalPos) isShuffleSecond = false;   //シャッフルが終わったかどうかの判定
+		if (gameObject.transform.position == originalPos) 
+			isShuffleSecond = false;   //シャッフルが終わったかどうかの判定
 	}
 }

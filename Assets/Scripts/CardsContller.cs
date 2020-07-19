@@ -5,10 +5,10 @@ using UnityEngine;
 public class CardsContller : MonoBehaviour
 {
     [SerializeField] Distribute distribute;
-    [SerializeField] GameObject camera;
+    [SerializeField] GameObject mainCamera;
     /// <summary>トランプ生成するときの元オブジェクト</summary>
-    [SerializeField] List<GameObject> cardsPrefab = new List<GameObject>();
-    [SerializeField] List<GameObject> players;
+    [SerializeField] List<GameObject> cardsPrefab;
+    [SerializeField] List<PlayerContller> players;
     [SerializeField] Shuffle shuffle;
     [SerializeField] Transform cardsSetPos;
 
@@ -18,10 +18,9 @@ public class CardsContller : MonoBehaviour
     List<int> cardsNumber;
 
     //トランプの生成
-    public void CardsCreate()
+    public void CreateCards()
     {
-        for (int i = 0; i < 53; i++)
-        {
+        for (int i = 0; i < 53; i++) {
             cardsInformation.Add(Instantiate(cardsPrefab[i]).GetComponent<CardInformation>());
             cardsInformation[i].transform.rotation = Quaternion.Euler(180, 0, 0);   //トランプを裏側にしておく
             cardsInformation[i].transform.position = cardsSetPos.position;
@@ -32,16 +31,14 @@ public class CardsContller : MonoBehaviour
     //シャッフル完了後自動でトランプを配る
     void Distribute()
     {
-        for (int index = 0; index < 53; index++)
-        {
+        for (int index = 0; index < 53; index++) {
             distribute.CardDistribute(cardsInformation[cardsNumber[index]]);
         }
 
-        for (int playerIndex = 0; playerIndex < players.Count; playerIndex++)
-        {
-            players[playerIndex].SetActive(true);
+        for (int playerIndex = 0; playerIndex < players.Count; playerIndex++) {
+            players[playerIndex].Prepare();
         }
-        camera.SetActive(false);
+        mainCamera.SetActive(false);
     }
 
     //ゲームが開始したら自動でシャッフルされる
@@ -53,12 +50,13 @@ public class CardsContller : MonoBehaviour
 
     IEnumerator ShuffleAnimation()
     {
-        for (int i = 0; i < 53; i++)
-        {
+        for (int i = 0; i < 53; i++) {
             cardsInformation[i].originalPos = cardsInformation[i].transform.position;
 
+            //トランプデッキを二つに分ける
             cardsInformation[i].shufflePos = i % 2 == 0 ? new Vector3(-0.3f, 2f + .002f * i, 0) 
-                                                                             : new Vector3(0.3f, 2f + .002f * (i - 1), 0);   //トランプデッキを二つに分ける
+                                                                              : new Vector3(0.3f, 2f + .002f * (i - 1), 0);
+
             cardsInformation[i].isShuffleFirst = true;
         }
 

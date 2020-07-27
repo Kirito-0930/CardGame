@@ -7,11 +7,9 @@ public class Distribute : MonoBehaviour
     [SerializeField] GameObject player3;
     [SerializeField] GameObject player4;
 
-    int count = 0;
+    int count = 0;   //どのプレイヤーに配るか判定用
 
-    /// <summary>
-    /// どのプレイヤーに配るか分ける
-    /// </summary>
+    /// <summary>どのプレイヤーに配るか分ける</summary>
     /// <param name="cardCardInformation">i枚目のトランプオブジェクト</param>
     public void CardDistribute(CardInformation cardCardInformation)
     {

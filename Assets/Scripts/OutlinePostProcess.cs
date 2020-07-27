@@ -9,8 +9,7 @@ public class OutlinePostProcess : MonoBehaviour
     {
         get
         {
-            if (!instance)
-            {
+            if (!instance) {
                 instance = FindObjectOfType(typeof(OutlinePostProcess)) as OutlinePostProcess;
 
                 if (!instance)
@@ -30,8 +29,7 @@ public class OutlinePostProcess : MonoBehaviour
     public bool enable,pixelBase,occluder,alphaDepth;
     Camera postProcessCam, maskCam;
 
-    [SerializeField]
-    private Color outlineColor = new Color(1,.2f,0,1);
+    [SerializeField] private Color outlineColor = new Color(1,.2f,0,1);
     public Color OutlineColor
     {
         get { return outlineColor; }
@@ -41,9 +39,8 @@ public class OutlinePostProcess : MonoBehaviour
             postMat.SetColor("_OutlineColor", value);
         }
     }
-    [Range(1,8)]
-    public int resolutionReduce = 1;
 
+    [Range(1,8)] public int resolutionReduce = 1;
 
     //if need ingore some layer,just edit this list.
     public string[] ignoreLayerName = new string[] {
@@ -55,27 +52,21 @@ public class OutlinePostProcess : MonoBehaviour
     int[] ignoreLayerIndex;
 
 
-    [SerializeField, Header("Debug")]
-    private RenderTexture maskTexture;
-    [SerializeField]
-    private RenderTexture tempRT1, tempRT2;
-    private Material postMat,flatColor,grabDepth;
-    [SerializeField]
-    private RawImage mask, temp1, temp2;
+    [SerializeField, Header("Debug")] private RenderTexture maskTexture;
+    [SerializeField] private RenderTexture tempRT1, tempRT2;
+    [SerializeField] private RawImage mask, temp1, temp2;
+
+    private Material postMat, flatColor, grabDepth;
 
     void OnValidate()
     {
         if (!isRuntime) return;
         OutlineColor = outlineColor;
     }
-    void Start()
-    {
-        Init();
-    }
 
     bool isRuntime;
 
-    void Init()
+    public void Init()
     {
         if (Instance != this) Destroy(this);
         if (isRuntime) return;
@@ -115,21 +106,22 @@ public class OutlinePostProcess : MonoBehaviour
         OnValidate();
     }
 
-    void CopyCameraSetting(Camera form,Camera to) {
+    void CopyCameraSetting(Camera form,Camera to) 
+    {
         to.fieldOfView = form.fieldOfView;
         to.nearClipPlane = form.nearClipPlane;
         to.farClipPlane = form.farClipPlane;
         to.rect = form.rect;
     }
 
-    void AttachToRawImage() {
+    void AttachToRawImage() 
+    {
         if (!mask || !temp1 ||!temp2 ) return;
 
         mask.texture = maskTexture;
         temp1.texture = tempRT1;
         temp2.texture = tempRT2;
     }
-
 
     [ImageEffectOpaque]
     void OnRenderImage(RenderTexture source, RenderTexture destination)
@@ -150,8 +142,7 @@ public class OutlinePostProcess : MonoBehaviour
         CopyCameraSetting(postProcessCam,maskCam);
 
         //render mask map
-        if (occluder)
-        {
+        if (occluder) {
             int total = 0;
             foreach (var t in ignoreLayerIndex)
                 total += t;
@@ -161,8 +152,7 @@ public class OutlinePostProcess : MonoBehaviour
         }
 
         maskCam.cullingMask = 1 << LayerMask.NameToLayer("Outline");
-        if (pixelBase)
-        {
+        if (pixelBase) {
             maskCam.RenderWithShader(null, "");
             Graphics.Blit(maskTexture, tempRT1, flatColor, 0);
             Graphics.Blit(tempRT1, tempRT2, flatColor, 1);
@@ -172,6 +162,5 @@ public class OutlinePostProcess : MonoBehaviour
             maskCam.RenderWithShader(flatColor.shader, "RenderType");
             Graphics.Blit(maskTexture, destination, postMat);
         }
-
     }
 }

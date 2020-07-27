@@ -5,7 +5,6 @@ using UnityEngine;
 public class CardsContller : MonoBehaviour
 {
     [SerializeField] Distribute distribute;
-    [SerializeField] GameObject mainCamera;
     /// <summary>トランプ生成するときの元オブジェクト</summary>
     [SerializeField] List<GameObject> cardsPrefab;
     [SerializeField] List<PlayerContller> players;
@@ -17,7 +16,7 @@ public class CardsContller : MonoBehaviour
     /// <summary>cardsInformationのindexに入れる</summary>
     List<int> cardsNumber;
 
-    //トランプの生成
+    /// <summary>トランプの生成</summary>
     public void CreateCards()
     {
         for (int i = 0; i < 53; i++) {
@@ -28,6 +27,13 @@ public class CardsContller : MonoBehaviour
         }
     }
 
+    /// <summary>ゲームが開始したら自動でシャッフルされる</summary>
+    public void Shuffle()
+    {
+        StartCoroutine(ShuffleAnimation());      //見た目のトランプシャッフル
+        cardsNumber = shuffle.CardShuffle();   //内部的なトランプシャッフル
+    }
+
     //シャッフル完了後自動でトランプを配る
     void Distribute()
     {
@@ -36,18 +42,11 @@ public class CardsContller : MonoBehaviour
         }
 
         for (int playerIndex = 0; playerIndex < players.Count; playerIndex++) {
-            players[playerIndex].Prepare();
+            StartCoroutine(players[playerIndex].Prepare());
         }
-        mainCamera.SetActive(false);
     }
 
-    //ゲームが開始したら自動でシャッフルされる
-    public void Shuffle()
-    {
-        StartCoroutine(ShuffleAnimation());      //見た目のトランプシャッフル
-        cardsNumber = shuffle.CardShuffle();   //内部的なトランプシャッフル
-    }
-
+    //シャッフルの演出を制御
     IEnumerator ShuffleAnimation()
     {
         for (int i = 0; i < 53; i++) {
@@ -59,11 +58,10 @@ public class CardsContller : MonoBehaviour
 
             cardsInformation[i].isShuffleFirst = true;
         }
-
+        
         yield return new WaitForSeconds(2.5f);
 
-        for (int i = 0; i < 53; i++)
-        {
+        for (int i = 0; i < 53; i++) {
             cardsInformation[i].isShuffleFirst = false;
 
             yield return new WaitForSeconds(0.05f);

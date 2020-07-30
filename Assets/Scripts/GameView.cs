@@ -6,14 +6,22 @@ using TMPro;
 public class GameView : MonoBehaviour
 {
     [SerializeField] CardsContller cardsContller;
-    [SerializeField] GameObject Buttons;
+    [SerializeField] DiceContller diceContller;
+    [SerializeField] GameObject button;
+    [SerializeField] GameObject diceButton;
     [SerializeField] OutlinePostProcess outLinePost;
     [SerializeField] PlayerContller[] players;
+    [SerializeField] TextMeshProUGUI diceDisplay;
     [SerializeField] TextMeshProUGUI turnDisplay;
     [SerializeField] TextMeshProUGUI winerDisplay;
 
+    public bool isEvent = false;
+
+    bool isCPU;
+    bool isDebug;
     bool isTurn = false;
     bool winer = false;
+    float diceTextTime = 0;
     float time = 1;
     int haveMostCards = 0;
     int playersCheck = 0;
@@ -22,7 +30,8 @@ public class GameView : MonoBehaviour
     void Awake()
     {
         Random.InitState(System.DateTime.Now.Millisecond);
-        
+
+        diceContller.Init();
         outLinePost.Init();
         for (int i = 0; i < players.Length; i++) {
             players[i].Init();
@@ -37,23 +46,52 @@ public class GameView : MonoBehaviour
 
     void Update()
     {
-        if (turn == 0 && isTurn) {
+        //デバック用
+        if (Input.GetKeyDown(KeyCode.F1)) {
+            isDebug = !isDebug;
+        }
+        if (isDebug) {
+            players[0].DebugView();
+        }
+
+        Debug.Log(isTurn);
+
+        //サイコロイベント判定
+        if (isEvent) {
+            isTurn = false;
+            diceContller.DiceEvent();
+        }
+
+        if (!isTurn) return;
+
+        if (CPUCheck(turn)) {
+            StartCoroutine(players[turn].CPUTurn(players[IndexSet(turn)].haveCard));
+            isTurn = false;
+        }
+        else {
             players[0].NowSelectCard();
         }
-        else if (turn != 0 && isTurn) {
-            StartCoroutine(players[turn].CPUSelectCard(players[IndexSet(turn)].haveCard));
-            isTurn = false;
+
+        if (diceTextTime < 1) {
+            diceTextTime += Time.deltaTime;
+        }
+        else {
+            diceDisplay.text = "";
         }
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
-        if (isTurn || time < 1) {
-            time += Time.deltaTime / 2;
+        PlayerRotation();
+    }
 
-            players[turn].GetTurnRotation(time);
-            players[IndexSet(turn)].TakenTurnRotation(time);
-        }
+    //CPUかどうか判定
+    bool CPUCheck(int checknum)
+    {
+        if (checknum == 0) isCPU = false;
+        else isCPU = true;
+
+        return isCPU;
     }
 
     //最初のプレイヤーが引く相手とそれ以外を分ける
@@ -63,14 +101,64 @@ public class GameView : MonoBehaviour
         else return turn - 1;
     }
 
+    //タイトル画面に戻るボタン処理
     public void BackButton()
     {
         SceneManager.LoadScene(0);
     }
 
+    /// <summary>サイコロの出目によって各プレイヤーの手札を入れ替える</summary>
+    public void DiceCheck(int diceNumber)
+    {
+        var tmp = players[0].haveCard;
+
+        switch (diceNumber) {
+            case 1:
+                players[0].HaveCardsChange(players[3].haveCard);
+                players[3].HaveCardsChange(players[2].haveCard);
+                players[2].HaveCardsChange(players[1].haveCard);
+                players[1].HaveCardsChange(tmp);
+                diceDisplay.text = "Left 1";
+                break;
+            case 2:
+                diceDisplay.text = "Out";
+                break;
+            case 3:
+                players[0].HaveCardsChange(players[1].haveCard);
+                players[1].HaveCardsChange(players[2].haveCard);
+                players[2].HaveCardsChange(players[3].haveCard);
+                players[3].HaveCardsChange(tmp);
+                diceDisplay.text = "Right 1";
+                break;
+            case 4:
+                players[0].HaveCardsChange(players[1].haveCard);
+                players[1].HaveCardsChange(players[2].haveCard);
+                players[2].HaveCardsChange(players[3].haveCard);
+                players[3].HaveCardsChange(tmp);
+                diceDisplay.text = "Right 1";
+                break;
+            case 5:
+                diceDisplay.text = "Out";
+                break;
+            case 6:
+                players[0].HaveCardsChange(players[3].haveCard);
+                players[3].HaveCardsChange(players[2].haveCard);
+                players[2].HaveCardsChange(players[1].haveCard);
+                players[1].HaveCardsChange(tmp);
+                diceDisplay.text = "Left 1";
+                break;
+            default:
+                break;
+        }
+
+        diceTextTime = 0;
+        isTurn = true;
+    }
+
+    //もう一度ゲームを開始するボタン処理
     public void ReStartButton()
     {
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     /// <summary>各プレイヤーの準備ができたらターン開始</summary>
@@ -79,6 +167,7 @@ public class GameView : MonoBehaviour
         StartPlayerCheck();
 
         if (playersCheck == 3) {
+            diceButton.SetActive(true);
             TurnCheck();
         }
 
@@ -91,6 +180,17 @@ public class GameView : MonoBehaviour
         turnDisplay.text = $"Turn:Player{turn + 1}";
         isTurn = true;
         time = 0;
+    }
+
+    //ターンが来たプレイヤーを向き合わせる
+    void PlayerRotation()
+    {
+        if (isTurn || time < 1) {
+            time += Time.deltaTime / 2;
+
+            players[turn].GetTurnRotation(time);
+            players[IndexSet(turn)].TakenTurnRotation(time);
+        }
     }
 
     //トランプを一番持ってる人からスタートする
@@ -141,10 +241,10 @@ public class GameView : MonoBehaviour
         yield return new WaitForSeconds(0.2f);
 
         if (players[turn].haveCard.Count == 0) {
-            WinCheck();
+            StartCoroutine(WinCheck());
         }
         else if (players[IndexSet(turn)].haveCard.Count == 0) {
-            WinCheck();
+            StartCoroutine(WinCheck());
         }
 
         if (!winer) {
@@ -167,8 +267,8 @@ public class GameView : MonoBehaviour
     {
         winer = true;
 
-        if (turn == 0) {
-            winerDisplay.colorGradientPreset.bottomLeft 
+        if (players[0].haveCard.Count == 0) {
+            winerDisplay.colorGradientPreset.bottomLeft
                 = winerDisplay.colorGradientPreset.topRight = Color.white;
             winerDisplay.colorGradientPreset.bottomRight 
                 = winerDisplay.colorGradientPreset.topLeft = Color.yellow;
@@ -185,6 +285,6 @@ public class GameView : MonoBehaviour
         }
 
         yield return new WaitForSeconds(0.5f);
-        Buttons.SetActive(true);
+        button.SetActive(true);
     }
 }

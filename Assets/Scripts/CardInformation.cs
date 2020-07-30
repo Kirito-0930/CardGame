@@ -17,7 +17,7 @@ public class CardInformation : MonoBehaviour
 	public bool isShuffleFirst = false;
 	public bool isShuffleSecond = false;
 
-	void FixedUpdate()
+	void Update()
 	{
 		if (isShuffleFirst)   //山札を分けた時のポジション
 			gameObject.transform.position = Vector3.Lerp(gameObject.transform.position, shufflePos, Time.deltaTime * 3);

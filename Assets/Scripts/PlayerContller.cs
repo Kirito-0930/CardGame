@@ -14,6 +14,7 @@ public class PlayerContller : MonoBehaviour
     [SerializeField] Quaternion left;
 
     [SerializeField] float offset;                  //手札をずらす幅
+    [SerializeField] int diceProbability;        //サイコロを振る確率の初期値
 
     public List<CardInformation> haveCard 
         = new List<CardInformation>();     //このListにトランプが渡される
@@ -21,8 +22,17 @@ public class PlayerContller : MonoBehaviour
     Transform obj;                                   //選択したトランプが格納される
     Quaternion originalRotation;
 
+    bool canEvent = true;
     bool isPlayer;
     int defaultLayer = 1;
+
+    /// <summary>デバック用</summary>
+    public void DebugView()
+    {
+        if (obj != null) {
+           Debug.Log(obj.gameObject.GetComponent<CardInformation>()._number);
+        }
+    }
 
     /// <summary>元の向きに戻る</summary>
     public void DefaultRotation()
@@ -36,10 +46,27 @@ public class PlayerContller : MonoBehaviour
         }
     }
 
+    /// <summary>サイコロを振るボタンを押したとき</summary>
+    public void DiceButton()
+    {
+        if (canEvent) {
+            gameView.isEvent = true;
+            canEvent = false;
+        }
+    }
+
     /// <summary>トランプを引く相手の方を向く</summary>
     public void GetTurnRotation(float rotationTime)
     {
         transform.rotation = Quaternion.Slerp(originalRotation, right, rotationTime * 2);
+    }
+
+    /// <summary>サイコロの出目によって手札を変える</summary>
+    /// <param name="otherPlayerCards">入れ替える相手の手札</param>
+    public void HaveCardsChange(List<CardInformation> otherPlayerCards)
+    {
+        haveCard = otherPlayerCards;
+        CardsLineUp();
     }
 
     public void Init()
@@ -67,6 +94,15 @@ public class PlayerContller : MonoBehaviour
             obj.gameObject.layer = defaultLayer;
             StartCoroutine(gameView.ExchangeCard(obj.gameObject.GetComponent<CardInformation>()));
             obj = null;
+        }
+    }
+
+    //TODO:diceProbabilityに増減値を足す
+    /// <summary>サイコロを振る確率を変動させる</summary>
+    public void ProbabilityUP()
+    {
+        if (haveCard.Exists(h => h._isJoker == true)) { 
+        
         }
     }
 
@@ -154,8 +190,15 @@ public class PlayerContller : MonoBehaviour
     }
 
     /// <summary>CPUがトランプを引く処理</summary>
-    public IEnumerator CPUSelectCard(List<CardInformation> cardInformations)
+    public IEnumerator CPUTurn(List<CardInformation> cardInformations)
     {
+        if (diceProbability >= Random.Range(1, 101)) {
+            if (canEvent) {
+                gameView.isEvent = true;
+                canEvent = false;
+            }
+        }
+
         yield return new WaitForSeconds(Random.Range(1f, 3f));
 
         StartCoroutine(gameView.ExchangeCard(cardInformations[Random.Range(0, cardInformations.Count)]));

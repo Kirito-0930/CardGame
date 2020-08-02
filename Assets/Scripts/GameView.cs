@@ -1,7 +1,10 @@
-﻿using System.Collections;
+﻿using GameState;
+using System.Collections;
+using TMPro;
+using UniRx;
+using UniRx.Triggers;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using TMPro;
 
 public class GameView : MonoBehaviour
 {
@@ -15,22 +18,36 @@ public class GameView : MonoBehaviour
     [SerializeField] TextMeshProUGUI turnDisplay;
     [SerializeField] TextMeshProUGUI winerDisplay;
 
+    #region ステート変数
+    //各ステート
+    public StateProcessor StateProcessor { get; set; } = new StateProcessor();
+    public GameStateCPUTurn StateCPUTurn { get; set; } = new GameStateCPUTurn();
+    public GameStateDiceEvent StateDiceEvent { get; set; } = new GameStateDiceEvent();
+    public GameStateNoneTurn StateNoneTurn { get; set; } = new GameStateNoneTurn();
+    public GameStatePlayerTurn StatePlayerTurn { get; set; } = new GameStatePlayerTurn();
+    //変更前のステート名
+    string prevStateName;
+    #endregion
+
+
     public bool isEvent = false;
 
-    bool isCPU;
     bool isDebug;
     bool isTurn = false;
-    bool winer = false;
-    float diceTextTime = 0;
-    float time = 1;
+    bool iswiner = false;
     int haveMostCards = 0;
     int playersCheck = 0;
-    int turn;
+
+    public CardInformation tradedCardInformation;
+
+    ReactiveProperty<int> turn = new ReactiveProperty<int>();
 
     void Awake()
     {
         Random.InitState(System.DateTime.Now.Millisecond);
 
+        //各スクリプトの初期化
+        Init();
         diceContller.Init();
         outLinePost.Init();
         for (int i = 0; i < players.Length; i++) {
@@ -40,74 +57,160 @@ public class GameView : MonoBehaviour
 
     void Start()
     {
-        StartCoroutine(StartMotion());
-        isTurn = false;
+        #region デバック用
+        this.UpdateAsObservable()
+            .Where(check => Input.GetKeyDown(KeyCode.F1))
+            .Subscribe(_ => isDebug = !isDebug);
+
+        this.UpdateAsObservable()
+            .Where(check => isDebug)
+            .Subscribe(_ => players[0].DebugView());
+        #endregion
+
+        StartMotion();
+
+        //ステートの値が変更されたら実行処理を行うようにする
+        StateProcessor.State
+            .Where(name => StateProcessor.State.Value.GetStateName() != prevStateName)
+            .Subscribe(_ =>
+            {
+                Debug.Log("Now State:" + StateProcessor.State.Value.GetStateName());
+                prevStateName = StateProcessor.State.Value.GetStateName();
+                StateProcessor.Execute();
+            })
+            .AddTo(this);
+
+        //勝利判定
+        this.UpdateAsObservable()
+            .First(check => iswiner)
+            .Subscribe(_ => WinerDisplay());
     }
 
-    void Update()
+    void Init()
     {
-        //デバック用
-        if (Input.GetKeyDown(KeyCode.F1)) {
-            isDebug = !isDebug;
-        }
-        if (isDebug) {
-            players[0].DebugView();
-        }
-
-        Debug.Log(isTurn);
-
-        //サイコロイベント判定
-        if (isEvent) {
-            isTurn = false;
-            diceContller.DiceEvent();
-        }
-
-        if (!isTurn) return;
-
-        if (CPUCheck(turn)) {
-            StartCoroutine(players[turn].CPUTurn(players[IndexSet(turn)].haveCard));
-            isTurn = false;
-        }
-        else {
-            players[0].NowSelectCard();
-        }
-
-        if (diceTextTime < 1) {
-            diceTextTime += Time.deltaTime;
-        }
-        else {
-            diceDisplay.text = "";
-        }
-    }
-
-    private void FixedUpdate()
-    {
-        PlayerRotation();
-    }
-
-    //CPUかどうか判定
-    bool CPUCheck(int checknum)
-    {
-        if (checknum == 0) isCPU = false;
-        else isCPU = true;
-
-        return isCPU;
+        //ステートの初期化
+        StateProcessor.State.Value = StateNoneTurn;
+        StateCPUTurn.ExecAction = CPUTurn;
+        StateDiceEvent.ExecAction = DiceEvent;
+        StateNoneTurn.ExecAction = NoneTurn;
+        StatePlayerTurn.ExecAction = PlayerTurn;
     }
 
     //最初のプレイヤーが引く相手とそれ以外を分ける
-    int IndexSet(int turn) 
+    int IndexSet(int turn)
     {
         if (turn == 0) return 3;
         else return turn - 1;
     }
 
-    //タイトル画面に戻るボタン処理
+    void TurnView()
+    {
+        var cpu = Observable.FromCoroutine(_ => CPUTurn());
+
+        Observable.WhenAll(cpu)
+            .Subscribe(_ => ExchangeCard());
+    }
+
+    /// <summary>トランプの取引をする</summary>
+    /// <param name="cardInformation">取引されるトランプ</param>
+    public void ExchangeCard(CardInformation cardInformation)
+    {
+        cardInformation.gameObject.tag = "Untagged";
+
+        int index;
+        index = players[IndexSet(turn.Value)].haveCard.FindIndex(h => h._number == cardInformation._number);
+
+        players[IndexSet(turn.Value)].TakenCard(index);
+        StartCoroutine(players[turn.Value].GetCard(cardInformation));
+
+        Observable.Timer(System.TimeSpan.FromSeconds(1.0f))
+            .Subscribe(_ => players[IndexSet(turn.Value)].DefaultRotation());
+
+        Observable.Timer(System.TimeSpan.FromSeconds(0.2f))
+            .Subscribe(_ => TurnCheck());
+    }
+
+    # region ボタン処理
+    //タイトル画面に戻る
     public void BackButton()
     {
         SceneManager.LoadScene(0);
     }
 
+    //もう一度ゲームを開始する
+    public void ReStartButton()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+    #endregion
+
+    #region ターン判定
+    /// <summary>各プレイヤーの準備ができたらターン開始</summary>
+    public void TurnStartCheck()
+    {
+        StartedTurn();
+
+        if (playersCheck == 3) {
+            diceButton.SetActive(true);
+            TurnCheck();
+        }
+
+        playersCheck++;
+    }
+
+    //ステートを変える
+    void StateChange(int turn)
+    {
+        turnDisplay.text = $"Turn:Player{turn + 1}";
+
+        //プレイヤーかCPUかの判定
+        _ = (turn == 0) ? StateProcessor.State.Value = StatePlayerTurn 
+                                 : StateProcessor.State.Value = StateCPUTurn;
+    }
+
+    //トランプを一番持ってる人からスタートする
+    void StartedTurn()
+    {
+        if (haveMostCards <= players[playersCheck].haveCard.Count) {
+            haveMostCards = players[playersCheck].haveCard.Count;
+            turn.Value = playersCheck;
+        }
+    }
+
+    //ターン中か判定
+    void TurnCheck()
+    {
+        turn
+            .Where(_ => isTurn)
+            .Subscribe(_ => StateChange(turn.Value));
+    }
+    #endregion
+
+    #region 各ターンの処理
+    IEnumerator CPUTurn()
+    {
+        yield return new WaitForSeconds(0.2f);
+    }
+
+    void NoneTurn()
+    {
+        Debug.Log("StateがNoneTurnに状態遷移しました。");
+    }
+
+    void PlayerTurn()
+    {
+
+    }
+    #endregion
+
+    #region サイコロイベント処理
+    void DiceEvent()
+    {
+        diceContller.DiceEvent();
+    }
+
     /// <summary>サイコロの出目によって各プレイヤーの手札を入れ替える</summary>
+    /// <param name="diceNumber">出目が送られる</param>
     public void DiceCheck(int diceNumber)
     {
         var tmp = players[0].haveCard;
@@ -151,126 +254,17 @@ public class GameView : MonoBehaviour
                 break;
         }
 
-        diceTextTime = 0;
         isTurn = true;
     }
+    #endregion
 
-    //もう一度ゲームを開始するボタン処理
-    public void ReStartButton()
+    //勝利演出
+    void WinerDisplay()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
-
-    /// <summary>各プレイヤーの準備ができたらターン開始</summary>
-    public void StartCheck()
-    {
-        StartPlayerCheck();
-
-        if (playersCheck == 3) {
-            diceButton.SetActive(true);
-            TurnCheck();
-        }
-
-        playersCheck++;
-    }
-
-    //プレイヤーにターンが来たことを知らせる
-    void RequestPlayerTurn(int turn)
-    {
-        turnDisplay.text = $"Turn:Player{turn + 1}";
-        isTurn = true;
-        time = 0;
-    }
-
-    //ターンが来たプレイヤーを向き合わせる
-    void PlayerRotation()
-    {
-        if (isTurn || time < 1) {
-            time += Time.deltaTime / 2;
-
-            players[turn].GetTurnRotation(time);
-            players[IndexSet(turn)].TakenTurnRotation(time);
-        }
-    }
-
-    //トランプを一番持ってる人からスタートする
-    void StartPlayerCheck()
-    {
-        if (haveMostCards <= players[playersCheck].haveCard.Count) {
-            haveMostCards = players[playersCheck].haveCard.Count;
-            turn = playersCheck;
-        }
-    }
-
-    //今誰のターンか判定
-    void TurnCheck()
-    {
-        if (turn == 4) turn = 0;
-
-        switch (turn) {
-            case 0:
-                RequestPlayerTurn(turn);
-                break;
-            case 1:
-                RequestPlayerTurn(turn);
-                break;
-            case 2:
-                RequestPlayerTurn(turn);
-                break;
-            case 3:
-                RequestPlayerTurn(turn);
-                break;
-        }
-    }
-
-    /// <summary>トランプの取引をする</summary>
-    /// <param name="cardInformation">取引されるトランプ</param>
-    public IEnumerator ExchangeCard(CardInformation cardInformation)
-    {
-        isTurn = false;
-        cardInformation.gameObject.tag = "Untagged";
-
-        int index;
-        index = players[IndexSet(turn)].haveCard.FindIndex(h => h._number == cardInformation._number);
-
-        players[IndexSet(turn)].TakenCard(index);
-        StartCoroutine(players[turn].GetCard(cardInformation));
-        yield return new WaitForSeconds(1f);
-
-        players[IndexSet(turn)].DefaultRotation();
-        yield return new WaitForSeconds(0.2f);
-
-        if (players[turn].haveCard.Count == 0) {
-            StartCoroutine(WinCheck());
-        }
-        else if (players[IndexSet(turn)].haveCard.Count == 0) {
-            StartCoroutine(WinCheck());
-        }
-
-        if (!winer) {
-            turn++;
-            TurnCheck();
-        }
-    }
-
-    //ゲームを始めるまでの準備
-    IEnumerator StartMotion()
-    {
-        cardsContller.CreateCards();
-        yield return new WaitForSeconds(1f);
-
-        cardsContller.Shuffle();
-    }
-
-    //勝利判定
-    IEnumerator WinCheck()
-    {
-        winer = true;
-
         if (players[0].haveCard.Count == 0) {
             winerDisplay.colorGradientPreset.bottomLeft
                 = winerDisplay.colorGradientPreset.topRight = Color.white;
-            winerDisplay.colorGradientPreset.bottomRight 
+            winerDisplay.colorGradientPreset.bottomRight
                 = winerDisplay.colorGradientPreset.topLeft = Color.yellow;
 
             winerDisplay.text = "You Winer!!";
@@ -284,7 +278,16 @@ public class GameView : MonoBehaviour
             winerDisplay.text = "You Lose.";
         }
 
-        yield return new WaitForSeconds(0.5f);
-        button.SetActive(true);
+        Observable.Timer(System.TimeSpan.FromSeconds(0.5f))
+            .Subscribe(_ => button.SetActive(true));
+    }
+
+    //ゲームを始めるまでの準備
+    void StartMotion()
+    {
+        cardsContller.CreateCards();
+
+        Observable.Timer(System.TimeSpan.FromSeconds(1.0f))
+            .Subscribe(_ => cardsContller.Shuffle());
     }
 }

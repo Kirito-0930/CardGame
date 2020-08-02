@@ -92,7 +92,7 @@ public class PlayerContller : MonoBehaviour
         /*どのトランプを取ったかGameViewに伝える*/
         if (Input.GetMouseButtonDown(0) && obj != null) {
             obj.gameObject.layer = defaultLayer;
-            StartCoroutine(gameView.ExchangeCard(obj.gameObject.GetComponent<CardInformation>()));
+
             obj = null;
         }
     }
@@ -190,7 +190,7 @@ public class PlayerContller : MonoBehaviour
     }
 
     /// <summary>CPUがトランプを引く処理</summary>
-    public IEnumerator CPUTurn(List<CardInformation> cardInformations)
+    public IEnumerator CPUTurn(int haveCardCount)
     {
         if (diceProbability >= Random.Range(1, 101)) {
             if (canEvent) {
@@ -199,9 +199,7 @@ public class PlayerContller : MonoBehaviour
             }
         }
 
-        yield return new WaitForSeconds(Random.Range(1f, 3f));
-
-        StartCoroutine(gameView.ExchangeCard(cardInformations[Random.Range(0, cardInformations.Count)]));
+        yield return gameView.tradedCardInformation
     }
 
     /// <summary>引いたトランプを手札に追加し、そろっていたら捨てる</summary>
@@ -244,6 +242,6 @@ public class PlayerContller : MonoBehaviour
         CardsLineUp();
         yield return new WaitForSeconds(1f);
 
-        gameView.StartCheck();   //準備ができたことを知らせる
+        //TODO:準備ができたことを知らせる
     }
 }

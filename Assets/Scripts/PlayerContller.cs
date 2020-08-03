@@ -34,41 +34,6 @@ public class PlayerContller : MonoBehaviour
         }
     }
 
-    /// <summary>元の向きに戻る</summary>
-    public void DefaultRotation()
-    {
-        transform.rotation = originalRotation;
-
-        if (isPlayer) {
-            for (int i = 0; i < haveCard.Count; i++) {
-                haveCard[i].tag = "Untagged";
-            }
-        }
-    }
-
-    /// <summary>サイコロを振るボタンを押したとき</summary>
-    public void DiceButton()
-    {
-        if (canEvent) {
-            gameView.isEvent = true;
-            canEvent = false;
-        }
-    }
-
-    /// <summary>トランプを引く相手の方を向く</summary>
-    public void GetTurnRotation(float rotationTime)
-    {
-        transform.rotation = Quaternion.Slerp(originalRotation, right, rotationTime * 2);
-    }
-
-    /// <summary>サイコロの出目によって手札を変える</summary>
-    /// <param name="otherPlayerCards">入れ替える相手の手札</param>
-    public void HaveCardsChange(List<CardInformation> otherPlayerCards)
-    {
-        haveCard = otherPlayerCards;
-        CardsLineUp();
-    }
-
     public void Init()
     {
         isPlayer = (gameObject.tag == "Player") ? true : false;
@@ -82,6 +47,7 @@ public class PlayerContller : MonoBehaviour
                                                               : Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y - 20, transform.eulerAngles.z);
     }
 
+    #region プレイヤーだけに行う処理 
     /// <summary>自分のターンの時処理される</summary>
     public void NowSelectCard()
     {
@@ -97,32 +63,65 @@ public class PlayerContller : MonoBehaviour
         }
     }
 
+    //選択しているトランプのレイヤーを変える
+    void LayerChange(Ray ray)
+    {
+        RaycastHit hit;
+
+        /*マウスポジションからレイを飛ばして当たったオブジェクトにアウトラインをつける*/
+        if (Physics.Raycast(ray, out hit)) {
+            if (obj == null && hit.transform.gameObject.tag == "CPU") {
+                obj = hit.transform;
+                obj.localPosition += new Vector3(0, 0, 0.1f);
+                obj.gameObject.layer = LayerMask.NameToLayer("Outline");
+            }
+            else if (obj != hit.transform && hit.transform.gameObject.tag == "CPU") {
+                obj.gameObject.layer = defaultLayer;
+                obj.localPosition -= new Vector3(0, 0, 0.1f);
+                obj = hit.transform;
+                obj.localPosition += new Vector3(0, 0, 0.1f);
+                obj.gameObject.layer = LayerMask.NameToLayer("Outline");
+            }
+        }
+    }
+    #endregion
+
+    #region CPUだけに行う処理
     //TODO:diceProbabilityに増減値を足す
     /// <summary>サイコロを振る確率を変動させる</summary>
     public void ProbabilityUP()
     {
-        if (haveCard.Exists(h => h._isJoker == true)) { 
-        
+        if (haveCard.Exists(h => h._isJoker == true))
+        {
+
         }
     }
 
-    /// <summary>トランプが引かれた時の処理</summary>
-    public void TakenCard(int haveCardIndex)
+    //アウトラインをつけるためにタグを変える
+    void TagChange()
     {
-        haveCard.RemoveAt(haveCardIndex);
-        CardsLineUp();
+        if (!isPlayer) {
+            for (int i = 0; i < haveCard.Count; i++) {
+                haveCard[i].tag = gameObject.tag;
+            }
+        }
     }
 
-    /// <summary>トランプを引かれる方を向く</summary>
-    public void TakenTurnRotation(float rotationTime)
+    /// <summary>トランプを引く処理</summary>
+    public IEnumerator CPUTurn(int haveCardCount)
     {
-        if (rotationTime < 1) {
-            TagChange();
+        if (diceProbability >= Random.Range(1, 101)) {
+            if (canEvent) {
+                gameView.isEvent = true;
+                canEvent = false;
+            }
         }
 
-        transform.rotation = Quaternion.Slerp(transform.rotation, left, rotationTime);
+        yield return gameView.tradedCardInformation;
     }
+    #endregion
 
+    #region 手札に行う処理
     //トランプを並べる
     void CardsLineUp()
     {
@@ -156,50 +155,49 @@ public class PlayerContller : MonoBehaviour
         }
     }
 
-    //選択しているトランプのレイヤーを変える
-    void LayerChange(Ray ray)
+    /// <summary>最初に配られたトランプの整理</summary>
+    public IEnumerator Prepare()
     {
-        RaycastHit hit;
+        CardsLineUp();
+        yield return new WaitForSeconds(1f);
 
-        /*マウスポジションからレイを飛ばして当たったオブジェクトにアウトラインをつける*/
-        if (Physics.Raycast(ray, out hit)) {
-            if (obj == null && hit.transform.gameObject.tag == "CPU") {
-                obj = hit.transform;
-                obj.localPosition += new Vector3(0, 0, 0.1f); 
-                obj.gameObject.layer = LayerMask.NameToLayer("Outline");
-            }
-            else if (obj != hit.transform && hit.transform.gameObject.tag == "CPU") {
-                obj.gameObject.layer = defaultLayer;
-                obj.localPosition -= new Vector3(0, 0, 0.1f);
-                obj = hit.transform;
-                obj.localPosition += new Vector3(0, 0, 0.1f);
-                obj.gameObject.layer = LayerMask.NameToLayer("Outline");
-            }
+        /*揃っているトランプがあるか調べる*/
+        for (int i = 0; i < haveCard.Count; i++) {
+            FristCardsSameCheck(i);
+        }
+
+        CardsLineUp();
+        yield return new WaitForSeconds(1f);
+
+        //TODO:準備ができたことを知らせる
+    }
+    #endregion
+
+    #region サイコロイベント処理
+    /// <summary>サイコロを振るボタンを押したとき</summary>
+    public void DiceButton()
+    {
+        if (canEvent) {
+            gameView.isEvent = true;
+            canEvent = false;
         }
     }
 
-    //CPUのみにこの処理を行う
-    void TagChange()
+    /// <summary>サイコロの出目によって手札を変える</summary>
+    /// <param name="otherPlayerCards">入れ替える相手の手札</param>
+    public void HaveCardsChange(List<CardInformation> otherPlayerCards)
     {
-        /*アウトラインをつけるためにタグを変える*/
-        if (!isPlayer) {
-            for (int i = 0; i < haveCard.Count; i++) {
-                haveCard[i].tag = gameObject.tag;
-            }
-        }
+        haveCard = otherPlayerCards;
+        CardsLineUp();
     }
+    #endregion
 
-    /// <summary>CPUがトランプを引く処理</summary>
-    public IEnumerator CPUTurn(int haveCardCount)
+    #region トランプの取引処理
+    /// <summary>トランプが引かれた時の処理</summary>
+    public void TakenCard(int haveCardIndex)
     {
-        if (diceProbability >= Random.Range(1, 101)) {
-            if (canEvent) {
-                gameView.isEvent = true;
-                canEvent = false;
-            }
-        }
-
-        yield return gameView.tradedCardInformation
+        haveCard.RemoveAt(haveCardIndex);
+        CardsLineUp();
     }
 
     /// <summary>引いたトランプを手札に追加し、そろっていたら捨てる</summary>
@@ -227,21 +225,35 @@ public class PlayerContller : MonoBehaviour
             CardsLineUp();
         }
     }
+    #endregion
 
-    /// <summary>配られたトランプの整理</summary>
-    public IEnumerator Prepare()
+    #region ターンによって向きを変える
+    /// <summary>元の向きに戻る</summary>
+    public void DefaultRotation()
     {
-        CardsLineUp();
-        yield return new WaitForSeconds(1f);
+        transform.rotation = originalRotation;
 
-        /*揃っているトランプがあるか調べる*/
-        for (int i = 0; i < haveCard.Count; i++) {
-            FristCardsSameCheck(i);
+        if (isPlayer) {
+            for (int i = 0; i < haveCard.Count; i++) {
+                haveCard[i].tag = "Untagged";
+            }
+        }
+    }
+
+    /// <summary>トランプを引く相手の方を向く</summary>
+    public void GetTurnRotation(float rotationTime)
+    {
+        transform.rotation = Quaternion.Slerp(originalRotation, right, rotationTime * 2);
+    }
+
+    /// <summary>トランプを引かれる方を向く</summary>
+    public void TakenTurnRotation(float rotationTime)
+    {
+        if (rotationTime < 1) {
+            TagChange();
         }
 
-        CardsLineUp();
-        yield return new WaitForSeconds(1f);
-
-        //TODO:準備ができたことを知らせる
+        transform.rotation = Quaternion.Slerp(transform.rotation, left, rotationTime);
     }
+    #endregion
 }

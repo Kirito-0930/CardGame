@@ -29,11 +29,9 @@ public class GameView : MonoBehaviour
     string prevStateName;
     #endregion
 
-
     public bool isEvent = false;
 
     bool isDebug;
-    bool isTurn = false;
     bool iswiner = false;
     int haveMostCards = 0;
     int playersCheck = 0;
@@ -83,7 +81,8 @@ public class GameView : MonoBehaviour
         //勝利判定
         this.UpdateAsObservable()
             .First(check => iswiner)
-            .Subscribe(_ => WinerDisplay());
+            .Subscribe(_ => WinerDisplay())
+            .AddTo(this);
     }
 
     void Init()
@@ -103,12 +102,9 @@ public class GameView : MonoBehaviour
         else return turn - 1;
     }
 
-    void TurnView()
+    IEnumerator TurnView()
     {
-        var cpu = Observable.FromCoroutine(_ => CPUTurn());
-
-        Observable.WhenAll(cpu)
-            .Subscribe(_ => ExchangeCard());
+       
     }
 
     /// <summary>トランプの取引をする</summary>
@@ -124,10 +120,12 @@ public class GameView : MonoBehaviour
         StartCoroutine(players[turn.Value].GetCard(cardInformation));
 
         Observable.Timer(System.TimeSpan.FromSeconds(1.0f))
-            .Subscribe(_ => players[IndexSet(turn.Value)].DefaultRotation());
+            .Subscribe(_ => players[IndexSet(turn.Value)].DefaultRotation())
+            .AddTo(this);
 
         Observable.Timer(System.TimeSpan.FromSeconds(0.2f))
-            .Subscribe(_ => TurnCheck());
+            .Subscribe(_ => TurnCheck())
+            .AddTo(this);
     }
 
     # region ボタン処理
@@ -181,15 +179,15 @@ public class GameView : MonoBehaviour
     void TurnCheck()
     {
         turn
-            .Where(_ => isTurn)
-            .Subscribe(_ => StateChange(turn.Value));
+            .Subscribe(_ => StateChange(turn.Value))
+            .AddTo(this);
     }
     #endregion
 
     #region 各ターンの処理
-    IEnumerator CPUTurn()
+    void CPUTurn()
     {
-        yield return new WaitForSeconds(0.2f);
+        
     }
 
     void NoneTurn()
@@ -199,7 +197,16 @@ public class GameView : MonoBehaviour
 
     void PlayerTurn()
     {
+        this.UpdateAsObservable()
+              .Subscribe(_ => players[0].NowSelectCard())
+              .AddTo(this);
 
+        this.FixedUpdateAsObservable()
+            .Subscribe(_ =>
+            {
+                players[0].GetTurnRotation(Time.deltaTime);
+            })
+            .AddTo(this);
     }
     #endregion
 
@@ -253,8 +260,6 @@ public class GameView : MonoBehaviour
             default:
                 break;
         }
-
-        isTurn = true;
     }
     #endregion
 
@@ -279,7 +284,8 @@ public class GameView : MonoBehaviour
         }
 
         Observable.Timer(System.TimeSpan.FromSeconds(0.5f))
-            .Subscribe(_ => button.SetActive(true));
+            .Subscribe(_ => button.SetActive(true))
+            .AddTo(this);
     }
 
     //ゲームを始めるまでの準備
@@ -288,6 +294,7 @@ public class GameView : MonoBehaviour
         cardsContller.CreateCards();
 
         Observable.Timer(System.TimeSpan.FromSeconds(1.0f))
-            .Subscribe(_ => cardsContller.Shuffle());
+            .Subscribe(_ => cardsContller.Shuffle())
+            .AddTo(this);
     }
 }

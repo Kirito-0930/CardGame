@@ -70,7 +70,7 @@ public class GameManager : MonoBehaviour
         if (!isTurn) return;
 
         if (CPUCheck(turn)) {
-            StartCoroutine(players[turn].CPUTurn(players[IndexSet(turn)].haveCard));
+            //StartCoroutine(players[turn].CPUTurn(players[IndexSet(turn)].haveCard));
         }
         else {
             players[0].NowSelectCard();

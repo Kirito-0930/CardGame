@@ -39,6 +39,7 @@ public class GameView : MonoBehaviour
     public CardInformation tradedCardInformation;
 
     ReactiveProperty<int> turn = new ReactiveProperty<int>();
+    CompositeDisposable disposable = new CompositeDisposable();
 
     void Awake()
     {
@@ -100,11 +101,6 @@ public class GameView : MonoBehaviour
     {
         if (turn == 0) return 3;
         else return turn - 1;
-    }
-
-    IEnumerator TurnView()
-    {
-       
     }
 
     /// <summary>トランプの取引をする</summary>
@@ -198,21 +194,19 @@ public class GameView : MonoBehaviour
     void PlayerTurn()
     {
         this.UpdateAsObservable()
-              .Subscribe(_ => players[0].NowSelectCard())
-              .AddTo(this);
-
-        this.FixedUpdateAsObservable()
-            .Subscribe(_ =>
-            {
-                players[0].GetTurnRotation(Time.deltaTime);
-            })
-            .AddTo(this);
+              .Subscribe(_ => 
+              {
+                  players[0].NowSelectCard();
+                  players[0].GetTurnRotation(Time.deltaTime);
+              })
+              .AddTo(disposable);
     }
     #endregion
 
     #region サイコロイベント処理
     void DiceEvent()
     {
+        disposable.Dispose();
         diceContller.DiceEvent();
     }
 
@@ -260,6 +254,8 @@ public class GameView : MonoBehaviour
             default:
                 break;
         }
+
+        disposable = new CompositeDisposable();
     }
     #endregion
 

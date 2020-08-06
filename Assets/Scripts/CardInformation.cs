@@ -2,14 +2,14 @@
 
 public class CardInformation : MonoBehaviour
 {
-	[SerializeField] string suit;     //トランプのマーク(スート)を保持(♣, ♦, ♥, ♠, Joker)
-	public string _suit { get { return suit; } }
+	[SerializeField] string _suit;     //トランプのマーク(スート)を保持(♣, ♦, ♥, ♠, Joker)
+	public string suit { get { return _suit; } }
 
-	[SerializeField] int number;    //トランプの数字を保持
-	public int _number { get { return number; } }
+	[SerializeField] int _number;    //トランプの数字を保持
+	public int number { get { return _number; } }
 
-	[SerializeField] bool isJoker;   //ジョーカーか否かを保持
-	public bool _isJoker { get { return isJoker; } }
+	[SerializeField] bool _isJoker;   //ジョーカーか否かを保持
+	public bool isJoker { get { return _isJoker; } }
 
 	public Vector3 originalPos;     //生成された時のポジション
 	public Vector3 shufflePos;      //山を二つに分けた時のポジションが渡される

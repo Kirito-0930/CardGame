@@ -43,7 +43,7 @@ public class PlayerContller : MonoBehaviour
     public void DebugView()
     {
         if (obj != null) {
-           Debug.Log(obj.gameObject.GetComponent<CardInformation>()._number);
+           Debug.Log(obj.gameObject.GetComponent<CardInformation>().number);
         }
     }
 
@@ -87,22 +87,29 @@ public class PlayerContller : MonoBehaviour
         }
     }
 
-    /// <summary>サイコロの出目によって手札を変える</summary>
-    /// <param name="otherPlayerCards">入れ替える相手の手札</param>
-    public void HaveCardsChange(List<CardInformation> otherPlayerCards)
-    {
-        haveCard = otherPlayerCards;
-        CardsLineUp();
-    }
-
     //TODO:diceProbabilityに増減値を足す
     /// <summary>サイコロを振る確率を変動させる</summary>
     public void ProbabilityUP()
     {
-        if (haveCard.Exists(h => h._isJoker == true))
+        if (haveCard.Exists(h => h.isJoker == true))
         {
 
         }
+    }
+
+    /// <summary>サイコロの出目によって手札を変える</summary>
+    /// <param name="otherPlayerCards">入れ替える相手の手札</param>
+    public IEnumerator HaveCardsChange(List<CardInformation> otherPlayerCards)
+    {
+        haveCard = otherPlayerCards;
+
+        for (int i = haveCard.Count - 1; i <= 0; i--) {
+            haveCard[i].transform.localPosition -= new Vector3(offset * i, 0.001f * i, 0);
+            haveCard[i].tag = "Untagged";
+            haveCard[i].transform.parent = null;
+            yield return new WaitForSeconds(0.2f);
+        }
+        CardsLineUp();
     }
     #endregion
 
@@ -133,7 +140,7 @@ public class PlayerContller : MonoBehaviour
     void FristCardsSameCheck(int checkCardIndex)
     {
         for (int i = checkCardIndex + 1; i < haveCard.Count; i++) {
-            if (haveCard[checkCardIndex]._number == haveCard[i]._number) {
+            if (haveCard[checkCardIndex].number == haveCard[i].number) {
                 CardThrowAway(checkCardIndex, i);
                 FristCardsSameCheck(checkCardIndex);
             }
@@ -199,19 +206,23 @@ public class PlayerContller : MonoBehaviour
 
         /*マウスポジションからレイを飛ばして当たったオブジェクトにアウトラインをつける*/
         if (Physics.Raycast(ray, out hit)) {
-            if (hit.transform.gameObject.tag != "CPU") return;
-
-            if (obj == null) {
+            if (obj == null && hit.transform.gameObject.tag == "CPU") {
                 obj = hit.transform;
                 obj.localPosition += new Vector3(0, 0, 0.1f);
                 obj.gameObject.layer = LayerMask.NameToLayer("Outline");
             }
-            else {
+            else if (hit.transform.gameObject.tag == "CPU") {
                 obj.gameObject.layer = defaultLayer;
                 obj.localPosition -= new Vector3(0, 0, 0.1f);
                 obj = hit.transform;
                 obj.localPosition += new Vector3(0, 0, 0.1f);
                 obj.gameObject.layer = LayerMask.NameToLayer("Outline");
+            }
+            else {
+                if (obj == null) return;
+                obj.gameObject.layer = defaultLayer;
+                obj.localPosition -= new Vector3(0, 0, 0.1f);
+                obj = null;
             }
         }
     }
@@ -235,8 +246,8 @@ public class PlayerContller : MonoBehaviour
     public IEnumerator GetCard(CardInformation cardInformation)
     {
         /*数字が揃っているか判定する*/
-        if (haveCard.Exists(h => h._number == cardInformation._number)) {
-            int index = haveCard.FindIndex(h => h._number == cardInformation._number);
+        if (haveCard.Exists(h => h.number == cardInformation.number)) {
+            int index = haveCard.FindIndex(h => h.number == cardInformation.number);
             haveCard.Add(cardInformation);
             CardsLineUp();
             yield return new WaitForSeconds(0.5f);

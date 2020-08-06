@@ -107,9 +107,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3f8c33276b0ba94d83e52471280b8c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  suit: "\u2665"
-  number: 12
-  isJoker: 0
+  _suit: "\u2665"
+  _number: 12
+  _isJoker: 0
   originalPos: {x: 0, y: 0, z: 0}
   shufflePos: {x: 0, y: 0, z: 0}
   isShuffleFirst: 0

@@ -72,7 +72,6 @@ Left1   = 6
         if (rb.IsSleeping() && rb.useGravity) {
             gameView.DiceCheck(GetNumber(transform));
             rb.useGravity = false;
-            gameView.isEvent = false;
             transform.position = new Vector3(0, 3.5f, 0);
             return;
         }

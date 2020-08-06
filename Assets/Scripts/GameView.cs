@@ -5,15 +5,25 @@ using TMPro;
 
 public class GameView : MonoBehaviour
 {
+    //各スクリプト変数
     [SerializeField] CardsContller cardsContller;
     [SerializeField] DiceContller diceContller;
-    [SerializeField] GameObject button;
-    [SerializeField] GameObject diceButton;
     [SerializeField] OutlinePostProcess outLinePost;
     [SerializeField] PlayerContller[] players;
+
+    [SerializeField] GameObject button;
+    [SerializeField] GameObject diceButton;
     [SerializeField] TextMeshProUGUI diceDisplay;
     [SerializeField] TextMeshProUGUI turnDisplay;
     [SerializeField] TextMeshProUGUI winerDisplay;
+
+    //サイコロイベント用変数
+    [SerializeField] Light diceLight;
+    [SerializeField] AnimationCurve animationCurve;
+
+    //SE・BGM用変数
+    [SerializeField] AudioClip diceSE;
+    AudioSource audioSource;
 
     public bool isEvent = false;
 
@@ -21,7 +31,7 @@ public class GameView : MonoBehaviour
     bool isDebug;
     bool isTurn = false;
     bool winer = false;
-    float diceTextTime = 0;
+    float diceEventTime = 0;
     float time = 1;
     int haveMostCards = 0;
     int playersCheck = 0;
@@ -30,6 +40,9 @@ public class GameView : MonoBehaviour
     void Awake()
     {
         Random.InitState(System.DateTime.Now.Millisecond);
+
+        audioSource = gameObject.GetComponent<AudioSource>();
+        isTurn = false;
 
         diceContller.Init();
         outLinePost.Init();
@@ -41,7 +54,6 @@ public class GameView : MonoBehaviour
     void Start()
     {
         StartCoroutine(StartMotion());
-        isTurn = false;
     }
 
     void Update()
@@ -54,11 +66,10 @@ public class GameView : MonoBehaviour
             players[0].DebugView();
         }
 
-        Debug.Log(isTurn);
-
         //サイコロイベント判定
         if (isEvent) {
             isTurn = false;
+            EventEffect();
             diceContller.DiceEvent();
         }
 
@@ -72,15 +83,10 @@ public class GameView : MonoBehaviour
             players[0].NowSelectCard();
         }
 
-        if (diceTextTime < 1) {
-            diceTextTime += Time.deltaTime;
-        }
-        else {
-            diceDisplay.text = "";
-        }
+        diceDisplay.text = "";
     }
 
-    private void FixedUpdate()
+    void FixedUpdate()
     {
         PlayerRotation();
     }
@@ -181,6 +187,7 @@ public class GameView : MonoBehaviour
     }
     #endregion
 
+    #region サイコロイベント処理
     /// <summary>サイコロの出目によって各プレイヤーの手札を入れ替える</summary>
     public void DiceCheck(int diceNumber)
     {
@@ -225,9 +232,23 @@ public class GameView : MonoBehaviour
                 break;
         }
 
-        diceTextTime = 0;
+        isEvent = false;
         isTurn = true;
     }
+
+    //サイコロイベントが発生した時の演出
+    void EventEffect()
+    {
+        for (int i = 0; i < players.Length; i++) {
+            if(i == 0) audioSource.PlayOneShot(diceSE);
+            players[i].DefaultRotation();
+        }
+
+        diceEventTime += Time.deltaTime;
+        diceLight.range = 10 * animationCurve.Evaluate(diceEventTime);
+        if (diceEventTime >= 1) diceEventTime = 0;
+    }
+    #endregion
 
     /// <summary>トランプの取引をする</summary>
     /// <param name="cardInformation">取引されるトランプ</param>
@@ -237,7 +258,7 @@ public class GameView : MonoBehaviour
         cardInformation.gameObject.tag = "Untagged";
 
         int index;
-        index = players[IndexSet(turn)].haveCard.FindIndex(h => h._number == cardInformation._number);
+        index = players[IndexSet(turn)].haveCard.FindIndex(h => h.number == cardInformation.number);
 
         players[IndexSet(turn)].TakenCard(index);
         StartCoroutine(players[turn].GetCard(cardInformation));

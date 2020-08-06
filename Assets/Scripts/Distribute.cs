@@ -2,34 +2,32 @@
 
 public class Distribute : MonoBehaviour
 {
-    [SerializeField] GameObject player;
-    [SerializeField] GameObject cpu1;
-    [SerializeField] GameObject cpu2;
-    [SerializeField] GameObject cpu3;
+    [SerializeField] GameObject player1;
+    [SerializeField] GameObject player2;
+    [SerializeField] GameObject player3;
+    [SerializeField] GameObject player4;
 
-    int count = 0;
+    int count = 0;   //どのプレイヤーに配るか判定用
 
-    /// <summary>
-    /// どのプレイヤーに配るか分ける
-    /// </summary>
+    /// <summary>どのプレイヤーに配るか分ける</summary>
     /// <param name="cardCardInformation">i枚目のトランプオブジェクト</param>
     public void CardDistribute(CardInformation cardCardInformation)
     {
         switch (count % 4) {
             case 0:
-                HandOver(cardCardInformation, player);
+                HandOver(cardCardInformation, player1);
                 count++;
                 break;
             case 1:
-                HandOver(cardCardInformation, cpu1);
+                HandOver(cardCardInformation, player2);
                 count++;
                 break;
             case 2:
-                HandOver(cardCardInformation, cpu2);
+                HandOver(cardCardInformation, player3);
                 count++;
                 break;
             case 3:
-                HandOver(cardCardInformation, cpu3);
+                HandOver(cardCardInformation, player4);
                 count = 0;
                 break;
         }
@@ -38,13 +36,6 @@ public class Distribute : MonoBehaviour
     //各プレイヤーの手札用ListにAddしていく
     void HandOver(CardInformation cardCardInformation, GameObject players)
     {
-        if (players.GetComponent<PlayerContller>() != null)
-        {
             players.GetComponent<PlayerContller>().haveCard.Add(cardCardInformation);
-        }
-        else 
-        {
-            players.GetComponent<CPUContller>().haveCard.Add(cardCardInformation);
-        }
     }
 }

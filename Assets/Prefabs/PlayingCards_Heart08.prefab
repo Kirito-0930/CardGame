@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 8637090993978412501}
   - component: {fileID: 8637090993978412506}
   - component: {fileID: 6612976926194282273}
-  - component: {fileID: -3220049153389270750}
   - component: {fileID: 4387905311122701958}
   m_Layer: 0
   m_Name: PlayingCards_Heart08
@@ -51,7 +50,7 @@ MeshRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8637090993978412504}
   m_Enabled: 1
-  m_CastShadows: 0
+  m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_MotionVectors: 1
@@ -96,22 +95,6 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: -4393675991995823134, guid: 0464afc39207ab540b94807b2273e3e5, type: 3}
---- !u!54 &-3220049153389270750
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8637090993978412504}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 0
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!114 &4387905311122701958
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -124,9 +107,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3f8c33276b0ba94d83e52471280b8c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  suit: "\u2665"
-  number: 8
-  isJoker: 0
+  _suit: "\u2665"
+  _number: 8
+  _isJoker: 0
   originalPos: {x: 0, y: 0, z: 0}
   shufflePos: {x: 0, y: 0, z: 0}
   isShuffleFirst: 0

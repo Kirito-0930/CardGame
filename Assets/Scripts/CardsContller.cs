@@ -5,10 +5,9 @@ using UnityEngine;
 public class CardsContller : MonoBehaviour
 {
     [SerializeField] Distribute distribute;
-    [SerializeField] GameObject camera;
     /// <summary>トランプ生成するときの元オブジェクト</summary>
-    [SerializeField] List<GameObject> cardsPrefab = new List<GameObject>();
-    [SerializeField] List<GameObject> players;
+    [SerializeField] List<GameObject> cardsPrefab;
+    [SerializeField] List<PlayerContller> players;
     [SerializeField] Shuffle shuffle;
     [SerializeField] Transform cardsSetPos;
 
@@ -17,11 +16,10 @@ public class CardsContller : MonoBehaviour
     /// <summary>cardsInformationのindexに入れる</summary>
     List<int> cardsNumber;
 
-    //トランプの生成
-    public void CardsCreate()
+    /// <summary>トランプの生成</summary>
+    public void CreateCards()
     {
-        for (int i = 0; i < 53; i++)
-        {
+        for (int i = 0; i < 53; i++) {
             cardsInformation.Add(Instantiate(cardsPrefab[i]).GetComponent<CardInformation>());
             cardsInformation[i].transform.rotation = Quaternion.Euler(180, 0, 0);   //トランプを裏側にしておく
             cardsInformation[i].transform.position = cardsSetPos.position;
@@ -29,43 +27,41 @@ public class CardsContller : MonoBehaviour
         }
     }
 
-    //各プレイヤーにトランプを配る            TODO:シャッフルしたら自動でトランプを配るようにする
-    public void RequestDistribute()
-    {
-        for (int index = 0; index < 53; index++)
-        {
-            distribute.CardDistribute(cardsInformation[cardsNumber[index]]);
-        }
-
-        for (int playerIndex = 0; playerIndex < players.Count; playerIndex++)
-        {
-            players[playerIndex].SetActive(true);
-        }
-        camera.SetActive(false);
-    }
-
-    //シャッフルボタンが押された時の処理   TODO:ゲームが開始したら自動でシャッフルするようにする
-    public void RequestShuffle()
+    /// <summary>ゲームが開始したら自動でシャッフルされる</summary>
+    public void Shuffle()
     {
         StartCoroutine(ShuffleAnimation());      //見た目のトランプシャッフル
         cardsNumber = shuffle.CardShuffle();   //内部的なトランプシャッフル
     }
 
-    IEnumerator ShuffleAnimation()
+    //シャッフル完了後自動でトランプを配る
+    void Distribute()
     {
-        for (int i = 0; i < 53; i++)
-        {
-            cardsInformation[i].originalPos = cardsInformation[i].transform.position;
-
-            cardsInformation[i].shufflePos = i % 2 == 0 ? new Vector3(-0.3f, 2f + .002f * i, 0) 
-                                                                             : new Vector3(0.3f, 2f + .002f * (i - 1), 0);   //トランプデッキを二つに分ける
-            cardsInformation[i].isShuffleFirst = true;
+        for (int index = 0; index < 53; index++) {
+            distribute.CardDistribute(cardsInformation[cardsNumber[index]]);
         }
 
+        for (int playerIndex = 0; playerIndex < players.Count; playerIndex++) {
+            StartCoroutine(players[playerIndex].Prepare());
+        }
+    }
+
+    //シャッフルの演出を制御
+    IEnumerator ShuffleAnimation()
+    {
+        for (int i = 0; i < 53; i++) {
+            cardsInformation[i].originalPos = cardsInformation[i].transform.position;
+
+            //トランプデッキを二つに分ける
+            cardsInformation[i].shufflePos = i % 2 == 0 ? new Vector3(-0.3f, 2f + .002f * i, 0) 
+                                                                              : new Vector3(0.3f, 2f + .002f * (i - 1), 0);
+
+            cardsInformation[i].isShuffleFirst = true;
+        }
+        
         yield return new WaitForSeconds(2.5f);
 
-        for (int i = 0; i < 53; i++)
-        {
+        for (int i = 0; i < 53; i++) {
             cardsInformation[i].isShuffleFirst = false;
 
             yield return new WaitForSeconds(0.05f);
@@ -73,5 +69,8 @@ public class CardsContller : MonoBehaviour
             if (i % 2 == 0) cardsInformation[i].isShuffleSecond = true;
             else cardsInformation[i].isShuffleSecond = true;
         }
+
+        yield return new WaitForSeconds(1.5f);
+        Distribute();
     }
 }

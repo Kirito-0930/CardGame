@@ -85,6 +85,7 @@ public class GameView : MonoBehaviour
         PlayerRotation();
     }
 
+    #region プレイヤーを判定
     //CPUかどうか判定
     bool CPUCheck(int checknum)
     {
@@ -95,72 +96,28 @@ public class GameView : MonoBehaviour
     }
 
     //最初のプレイヤーが引く相手とそれ以外を分ける
-    int IndexSet(int turn) 
+    int IndexSet(int turn)
     {
         if (turn == 0) return 3;
         else return turn - 1;
     }
+    #endregion
 
-    //タイトル画面に戻るボタン処理
+    #region ボタン処理
+    //タイトル画面に戻る
     public void BackButton()
     {
         SceneManager.LoadScene(0);
     }
 
-    /// <summary>サイコロの出目によって各プレイヤーの手札を入れ替える</summary>
-    public void DiceCheck(int diceNumber)
-    {
-        var tmp = players[0].haveCard;
-
-        switch (diceNumber) {
-            case 1:
-                players[0].HaveCardsChange(players[3].haveCard);
-                players[3].HaveCardsChange(players[2].haveCard);
-                players[2].HaveCardsChange(players[1].haveCard);
-                players[1].HaveCardsChange(tmp);
-                diceDisplay.text = "Left 1";
-                break;
-            case 2:
-                diceDisplay.text = "Out";
-                break;
-            case 3:
-                players[0].HaveCardsChange(players[1].haveCard);
-                players[1].HaveCardsChange(players[2].haveCard);
-                players[2].HaveCardsChange(players[3].haveCard);
-                players[3].HaveCardsChange(tmp);
-                diceDisplay.text = "Right 1";
-                break;
-            case 4:
-                players[0].HaveCardsChange(players[1].haveCard);
-                players[1].HaveCardsChange(players[2].haveCard);
-                players[2].HaveCardsChange(players[3].haveCard);
-                players[3].HaveCardsChange(tmp);
-                diceDisplay.text = "Right 1";
-                break;
-            case 5:
-                diceDisplay.text = "Out";
-                break;
-            case 6:
-                players[0].HaveCardsChange(players[3].haveCard);
-                players[3].HaveCardsChange(players[2].haveCard);
-                players[2].HaveCardsChange(players[1].haveCard);
-                players[1].HaveCardsChange(tmp);
-                diceDisplay.text = "Left 1";
-                break;
-            default:
-                break;
-        }
-
-        diceTextTime = 0;
-        isTurn = true;
-    }
-
-    //もう一度ゲームを開始するボタン処理
+    //もう一度ゲームを開始する
     public void ReStartButton()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
+    #endregion
 
+    #region ターン処理
     /// <summary>各プレイヤーの準備ができたらターン開始</summary>
     public void StartCheck()
     {
@@ -221,6 +178,55 @@ public class GameView : MonoBehaviour
                 RequestPlayerTurn(turn);
                 break;
         }
+    }
+    #endregion
+
+    /// <summary>サイコロの出目によって各プレイヤーの手札を入れ替える</summary>
+    public void DiceCheck(int diceNumber)
+    {
+        var tmp = players[0].haveCard;
+
+        switch (diceNumber) {
+            case 1:
+                players[0].HaveCardsChange(players[3].haveCard);
+                players[3].HaveCardsChange(players[2].haveCard);
+                players[2].HaveCardsChange(players[1].haveCard);
+                players[1].HaveCardsChange(tmp);
+                diceDisplay.text = "Left 1";
+                break;
+            case 2:
+                diceDisplay.text = "Out";
+                break;
+            case 3:
+                players[0].HaveCardsChange(players[1].haveCard);
+                players[1].HaveCardsChange(players[2].haveCard);
+                players[2].HaveCardsChange(players[3].haveCard);
+                players[3].HaveCardsChange(tmp);
+                diceDisplay.text = "Right 1";
+                break;
+            case 4:
+                players[0].HaveCardsChange(players[1].haveCard);
+                players[1].HaveCardsChange(players[2].haveCard);
+                players[2].HaveCardsChange(players[3].haveCard);
+                players[3].HaveCardsChange(tmp);
+                diceDisplay.text = "Right 1";
+                break;
+            case 5:
+                diceDisplay.text = "Out";
+                break;
+            case 6:
+                players[0].HaveCardsChange(players[3].haveCard);
+                players[3].HaveCardsChange(players[2].haveCard);
+                players[2].HaveCardsChange(players[1].haveCard);
+                players[1].HaveCardsChange(tmp);
+                diceDisplay.text = "Left 1";
+                break;
+            default:
+                break;
+        }
+
+        diceTextTime = 0;
+        isTurn = true;
     }
 
     /// <summary>トランプの取引をする</summary>

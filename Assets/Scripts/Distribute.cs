@@ -1,33 +1,32 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class Distribute : MonoBehaviour
 {
-    [SerializeField] GameObject player1;
-    [SerializeField] GameObject player2;
-    [SerializeField] GameObject player3;
-    [SerializeField] GameObject player4;
-
+    [SerializeField] List<GameObject> players = new List<GameObject>();
+ 
     int count = 0;   //どのプレイヤーに配るか判定用
 
     /// <summary>どのプレイヤーに配るか分ける</summary>
     /// <param name="cardCardInformation">i枚目のトランプオブジェクト</param>
-    public void CardDistribute(CardInformation cardCardInformation)
+    public void DistributeCard(CardInformation cardCardInformation)
     {
         switch (count % 4) {
             case 0:
-                HandOver(cardCardInformation, player1);
+                HandOver(cardCardInformation, players[count % 4]);
                 count++;
                 break;
             case 1:
-                HandOver(cardCardInformation, player2);
+                HandOver(cardCardInformation, players[count % 4]);
                 count++;
                 break;
             case 2:
-                HandOver(cardCardInformation, player3);
+                HandOver(cardCardInformation, players[count % 4]);
                 count++;
                 break;
             case 3:
-                HandOver(cardCardInformation, player4);
+                HandOver(cardCardInformation, players[count % 4]);
                 count = 0;
                 break;
         }

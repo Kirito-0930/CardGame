@@ -1,29 +1,38 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
+using UniRx;
 
 public class PlayerContller : MonoBehaviour
 {
-    [SerializeField] Camera playerCamera;
+    //他スクリプト
     [SerializeField] DisCardsContlloer trash;
-    [SerializeField] GameObject startpos;   //手札の基準ポジション
     [SerializeField] GameView gameView;
     [SerializeField] Shuffle shuffle;
 
-    [SerializeField] Quaternion right;
-    [SerializeField] Quaternion left;
-
+    //手札に使う
+    [SerializeField] GameObject startpos;   //手札の基準ポジション
     [SerializeField] float offset;                  //手札をずらす幅
-    [SerializeField] int diceProbability;        //サイコロを振る確率の初期値
-
     public List<CardInformation> haveCard 
         = new List<CardInformation>();     //このListにトランプが渡される
 
+    //プレイヤーだけが使う
+    [SerializeField] Camera playerCamera;
     Transform obj;                                   //選択したトランプが格納される
+    
+    //向きを変える時に使用する
+    [SerializeField] Quaternion right;
+    [SerializeField] Quaternion left;
     Quaternion originalRotation;
 
+    //CPUのみに使うサイコロイベント発動確率
+    [SerializeField] int diceProbability;        //サイコロを振る確率の初期値
+    uint XorShift;
+
     bool canEvent = true;
-    bool isPlayer;
+    public bool _isPlayer { private set; get; }
     int defaultLayer = 1;
 
     /// <summary>デバック用</summary>
@@ -36,15 +45,24 @@ public class PlayerContller : MonoBehaviour
 
     public void Init()
     {
-        isPlayer = (gameObject.tag == "Player") ? true : false;
+        //暗号論的疑似乱数
+        using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
+        {
+            byte[] nonce = new byte[sizeof(int)];
+
+            rng.GetBytes(nonce);
+            XorShift = BitConverter.ToUInt32(nonce, 0);
+        }
+
+        _isPlayer = (gameObject.tag == "Player") ? true : false;
 
         originalRotation = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y, transform.eulerAngles.z);
 
-        right = (gameObject.tag == "Player") ? Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y + 30, transform.eulerAngles.z)
-                                                                : Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y + 20, transform.eulerAngles.z);
+        right = (_isPlayer) ? Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y + 30, transform.eulerAngles.z)
+                                  : Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y + 20, transform.eulerAngles.z);
 
-        left = (gameObject.tag == "Player") ? Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y - 30, transform.eulerAngles.z)
-                                                              : Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y - 20, transform.eulerAngles.z);
+        left = (_isPlayer) ? Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y - 30, transform.eulerAngles.z)
+                                : Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y - 20, transform.eulerAngles.z);
     }
 
     #region プレイヤーだけに行う処理 
@@ -58,7 +76,7 @@ public class PlayerContller : MonoBehaviour
         /*どのトランプを取ったかGameViewに伝える*/
         if (Input.GetMouseButtonDown(0) && obj != null) {
             obj.gameObject.layer = defaultLayer;
-
+            gameView.ExchangeCard(obj.GetComponent<CardInformation>());
             obj = null;
         }
     }
@@ -98,26 +116,45 @@ public class PlayerContller : MonoBehaviour
     }
 
     //アウトラインをつけるためにタグを変える
-    void TagChange()
+    void ChangeTag()
     {
-        if (!isPlayer) {
+        if (!_isPlayer) {
             for (int i = 0; i < haveCard.Count; i++) {
                 haveCard[i].tag = gameObject.tag;
             }
         }
     }
 
-    /// <summary>トランプを引く処理</summary>
-    public IEnumerator CPUTurn(int haveCardCount)
+    public void DiceProbability()
     {
-        if (diceProbability >= Random.Range(1, 101)) {
-            if (canEvent) {
-                gameView.isEvent = true;
-                canEvent = false;
-            }
-        }
+        if (!canEvent) return;
 
-        yield return gameView.tradedCardInformation;
+        //XorShift
+        XorShift = (XorShift + 43) % 367;
+        XorShift %= 100;
+
+        if (diceProbability >= XorShift) {
+            gameView.isEvent = true;
+            canEvent = false;
+        }
+    }
+
+    /// <summary>トランプを引く処理</summary>
+    public int CPUTurn(int haveCardCount)
+    {
+        Observable.Timer(TimeSpan.FromSeconds(ThinkingTime()));
+
+        return UnityEngine.Random.Range(1, haveCardCount);
+    }
+
+    float ThinkingTime()
+    {
+        float time = 0.3f;
+        if (haveCard.Count <= 4)
+            time += 0.4f;
+        if (haveCard.Exists(h => h._isJoker == true))
+            time += 0.6f;
+        return time;
     }
     #endregion
 
@@ -169,7 +206,7 @@ public class PlayerContller : MonoBehaviour
         CardsLineUp();
         yield return new WaitForSeconds(1f);
 
-        //TODO:準備ができたことを知らせる
+        gameView.CheckTurnStart();
     }
     #endregion
 
@@ -185,7 +222,7 @@ public class PlayerContller : MonoBehaviour
 
     /// <summary>サイコロの出目によって手札を変える</summary>
     /// <param name="otherPlayerCards">入れ替える相手の手札</param>
-    public void HaveCardsChange(List<CardInformation> otherPlayerCards)
+    public void ChangeHaveCards(List<CardInformation> otherPlayerCards)
     {
         haveCard = otherPlayerCards;
         CardsLineUp();
@@ -233,10 +270,8 @@ public class PlayerContller : MonoBehaviour
     {
         transform.rotation = originalRotation;
 
-        if (isPlayer) {
-            for (int i = 0; i < haveCard.Count; i++) {
-                haveCard[i].tag = "Untagged";
-            }
+        for (int i = 0; i < haveCard.Count; i++) {
+            haveCard[i].tag = "Untagged";
         }
     }
 
@@ -250,7 +285,7 @@ public class PlayerContller : MonoBehaviour
     public void TakenTurnRotation(float rotationTime)
     {
         if (rotationTime < 1) {
-            TagChange();
+            ChangeTag();
         }
 
         transform.rotation = Quaternion.Slerp(transform.rotation, left, rotationTime);

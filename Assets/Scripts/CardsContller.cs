@@ -4,17 +4,24 @@ using UnityEngine;
 
 public class CardsContller : MonoBehaviour
 {
-    [SerializeField] Distribute distribute;
-    /// <summary>トランプ生成するときの元オブジェクト</summary>
+    #region トランプに使う変数
+    /// <summary>トランプ生成するときのオリジナルオブジェクト</summary>
     [SerializeField] List<GameObject> cardsPrefab;
-    [SerializeField] List<PlayerContller> players;
-    [SerializeField] Shuffle shuffle;
+
+    /// <summary>トランプを生成する位置</summary>
     [SerializeField] Transform cardsSetPos;
 
     /// <summary>トランプ情報(スート、番号、ジョーカーか否か)を入れる</summary>
     List<CardInformation> cardsInformation = new List<CardInformation>();
-    /// <summary>cardsInformationのindexに入れる</summary>
+
+    /// <summary>cardsInformationのindex</summary>
     List<int> cardsNumber;
+    #endregion
+
+    //他スクリプト
+    [SerializeField] Distribute distribute;
+    [SerializeField] List<PlayerContller> players;
+    [SerializeField] Shuffle shuffle;
 
     /// <summary>トランプの生成</summary>
     public void CreateCards()
@@ -38,7 +45,7 @@ public class CardsContller : MonoBehaviour
     void Distribute()
     {
         for (int index = 0; index < 53; index++) {
-            distribute.CardDistribute(cardsInformation[cardsNumber[index]]);
+            distribute.DistributeCard(cardsInformation[cardsNumber[index]]);
         }
 
         for (int playerIndex = 0; playerIndex < players.Count; playerIndex++) {

@@ -1140,16 +1140,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f46f008037202554ba9c37674d1ed0fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerCamera: {fileID: 0}
   trash: {fileID: 836704928}
-  startpos: {fileID: 1525756702}
   gameView: {fileID: 1214414134}
   shuffle: {fileID: 905952036}
+  startpos: {fileID: 1525756702}
+  offset: 0.1
+  haveCard: []
+  playerCamera: {fileID: 0}
   right: {x: 0, y: 200, z: 0, w: 0}
   left: {x: 0, y: 160, z: 0, w: 0}
-  offset: 0.1
   diceProbability: 20
-  haveCard: []
 --- !u!4 &515858140
 Transform:
   m_ObjectHideFlags: 0
@@ -1350,16 +1350,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f46f008037202554ba9c37674d1ed0fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerCamera: {fileID: 658469753}
   trash: {fileID: 836704928}
-  startpos: {fileID: 722114476}
   gameView: {fileID: 1214414134}
   shuffle: {fileID: 905952036}
+  startpos: {fileID: 722114476}
+  offset: 0.1
+  haveCard: []
+  playerCamera: {fileID: 658469753}
   right: {x: 0, y: 50, z: 0, w: 0}
   left: {x: 0, y: -50, z: 0, w: 0}
-  offset: 0.1
   diceProbability: 0
-  haveCard: []
 --- !u!4 &617429665
 Transform:
   m_ObjectHideFlags: 0
@@ -1549,16 +1549,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f46f008037202554ba9c37674d1ed0fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerCamera: {fileID: 0}
   trash: {fileID: 836704928}
-  startpos: {fileID: 1167996893}
   gameView: {fileID: 1214414134}
   shuffle: {fileID: 905952036}
+  startpos: {fileID: 1167996893}
+  offset: 0.1
+  haveCard: []
+  playerCamera: {fileID: 0}
   right: {x: 0, y: -70, z: 0, w: 0}
   left: {x: 0, y: -110, z: 0, w: 0}
-  offset: 0.1
   diceProbability: 30
-  haveCard: []
 --- !u!4 &742565009
 Transform:
   m_ObjectHideFlags: 0
@@ -2096,10 +2096,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e1338af9bea8984ba3ebdfee4f57546, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player1: {fileID: 617429663}
-  player2: {fileID: 1921522304}
-  player3: {fileID: 515858138}
-  player4: {fileID: 742565007}
+  players:
+  - {fileID: 617429663}
+  - {fileID: 1921522304}
+  - {fileID: 515858138}
+  - {fileID: 742565007}
 --- !u!114 &905952038
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2112,7 +2113,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a5eb0c7b9f60ff4ca4871a4167ebb43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  distribute: {fileID: 905952037}
   cardsPrefab:
   - {fileID: 397870510863733982, guid: c0bf68b0ec50d924ca8edb78d5cf4042, type: 3}
   - {fileID: 3776780259991147510, guid: 1cfd3ef2d218a844a8af2e0f38419161, type: 3}
@@ -2167,13 +2167,14 @@ MonoBehaviour:
   - {fileID: 1025345205497286970, guid: c3b0659a07b0f5b4788725213963b331, type: 3}
   - {fileID: 6194734613792943230, guid: e0586bb52342548449eb308996fb337b, type: 3}
   - {fileID: 6028208587398885814, guid: 2e6b7567c15cfc54fa70ed2108003fef, type: 3}
+  cardsSetPos: {fileID: 1727580788}
+  distribute: {fileID: 905952037}
   players:
   - {fileID: 617429664}
   - {fileID: 1921522305}
   - {fileID: 515858139}
   - {fileID: 742565008}
   shuffle: {fileID: 905952036}
-  cardsSetPos: {fileID: 1727580788}
 --- !u!1 &909749722
 GameObject:
   m_ObjectHideFlags: 0
@@ -2964,18 +2965,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardsContller: {fileID: 905952038}
   diceContller: {fileID: 8627389473734885344}
-  button: {fileID: 283111213}
-  diceButton: {fileID: 1973929567}
   outLinePost: {fileID: 658469749}
   players:
   - {fileID: 617429664}
   - {fileID: 1921522305}
   - {fileID: 515858139}
   - {fileID: 742565008}
+  button: {fileID: 283111213}
+  diceButton: {fileID: 1973929567}
   diceDisplay: {fileID: 1289592223}
   turnDisplay: {fileID: 545121947}
   winerDisplay: {fileID: 404252807}
   isEvent: 0
+  tradedCardInformation: {fileID: 0}
 --- !u!1 &1227110756
 GameObject:
   m_ObjectHideFlags: 0
@@ -3603,16 +3605,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f46f008037202554ba9c37674d1ed0fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerCamera: {fileID: 0}
   trash: {fileID: 836704928}
-  startpos: {fileID: 70260792}
   gameView: {fileID: 1214414134}
   shuffle: {fileID: 905952036}
+  startpos: {fileID: 70260792}
+  offset: 0.1
+  haveCard: []
+  playerCamera: {fileID: 0}
   right: {x: 0, y: 110, z: 0, w: 0}
   left: {x: 0, y: 70, z: 0, w: 0}
-  offset: 0.1
   diceProbability: 10
-  haveCard: []
 --- !u!4 &1921522306
 Transform:
   m_ObjectHideFlags: 0

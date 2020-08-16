@@ -118,37 +118,37 @@ public class GameManager : MonoBehaviour
 
         switch (diceNumber) {
             case 1:
-                players[0].HaveCardsChange(players[3].haveCard);
-                players[3].HaveCardsChange(players[2].haveCard);
-                players[2].HaveCardsChange(players[1].haveCard);
-                players[1].HaveCardsChange(tmp);
+                players[0].ChangeHaveCards(players[3].haveCard);
+                players[3].ChangeHaveCards(players[2].haveCard);
+                players[2].ChangeHaveCards(players[1].haveCard);
+                players[1].ChangeHaveCards(tmp);
                 diceDisplay.text = "Left 1";
                 break;
             case 2:
                 diceDisplay.text = "Out";
                 break;
             case 3:
-                players[0].HaveCardsChange(players[1].haveCard);
-                players[1].HaveCardsChange(players[2].haveCard);
-                players[2].HaveCardsChange(players[3].haveCard);
-                players[3].HaveCardsChange(tmp);
+                players[0].ChangeHaveCards(players[1].haveCard);
+                players[1].ChangeHaveCards(players[2].haveCard);
+                players[2].ChangeHaveCards(players[3].haveCard);
+                players[3].ChangeHaveCards(tmp);
                 diceDisplay.text = "Right 1";
                 break;
             case 4:
-                players[0].HaveCardsChange(players[1].haveCard);
-                players[1].HaveCardsChange(players[2].haveCard);
-                players[2].HaveCardsChange(players[3].haveCard);
-                players[3].HaveCardsChange(tmp);
+                players[0].ChangeHaveCards(players[1].haveCard);
+                players[1].ChangeHaveCards(players[2].haveCard);
+                players[2].ChangeHaveCards(players[3].haveCard);
+                players[3].ChangeHaveCards(tmp);
                 diceDisplay.text = "Right 1";
                 break;
             case 5:
                 diceDisplay.text = "Out";
                 break;
             case 6:
-                players[0].HaveCardsChange(players[3].haveCard);
-                players[3].HaveCardsChange(players[2].haveCard);
-                players[2].HaveCardsChange(players[1].haveCard);
-                players[1].HaveCardsChange(tmp);
+                players[0].ChangeHaveCards(players[3].haveCard);
+                players[3].ChangeHaveCards(players[2].haveCard);
+                players[2].ChangeHaveCards(players[1].haveCard);
+                players[1].ChangeHaveCards(tmp);
                 diceDisplay.text = "Left 1";
                 break;
             default:

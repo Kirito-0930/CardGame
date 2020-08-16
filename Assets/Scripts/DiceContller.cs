@@ -9,14 +9,17 @@ public class DiceContller : MonoBehaviour
 
     Rigidbody rb;
 
- /*
-Left1   = 1
-Out     = 2
-Right1 = 3
-Right1 = 4
-Out     = 5
-Left1   = 6
-*/
+    //TODO:GameViewで使う出目を列挙した変数に変える
+    enum DICE_ROLL
+    {
+        Left1_1,
+        Out1,
+        Right1_1,
+        Right1_2,
+        Out2,
+        Left1_2,
+    }
+
     //サイコロの出目判定
     int GetNumber(Transform diceTransform)
     {

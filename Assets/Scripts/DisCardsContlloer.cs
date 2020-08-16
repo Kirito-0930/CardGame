@@ -6,8 +6,8 @@ public class DisCardsContlloer : MonoBehaviour
 {
     List<CardInformation> discards = new List<CardInformation>();
 
-    float offset = .001f;
-    int cardCount = 0;   //捨てられたトランプが何枚目か
+    float offset = .001f;   //トランプの仮の厚み
+    int cardCount = 0;     //捨てられたトランプが何枚目か
 
     /// <summary>トランプの捨て場</summary>
     /// <param name="cardInformation">揃ったトランプが渡される</param>

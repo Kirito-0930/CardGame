@@ -82,8 +82,6 @@ public class GameView : MonoBehaviour
         else {
             players[0].NowSelectCard();
         }
-
-        diceDisplay.text = "";
     }
 
     void FixedUpdate()

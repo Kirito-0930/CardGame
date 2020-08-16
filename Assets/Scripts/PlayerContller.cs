@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
 
 public class PlayerContller : MonoBehaviour
@@ -15,8 +17,9 @@ public class PlayerContller : MonoBehaviour
 
     [SerializeField] float offset;                  //手札をずらす幅
     [SerializeField] int diceProbability;        //サイコロを振る確率の初期値
+    uint XorShift;
 
-    public List<CardInformation> haveCard 
+    public List<CardInformation> haveCard
         = new List<CardInformation>();     //このListにトランプが渡される
 
     Transform obj;                                   //選択したトランプが格納される
@@ -37,13 +40,22 @@ public class PlayerContller : MonoBehaviour
 
         left = (gameObject.tag == "Player") ? Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y - 30, transform.eulerAngles.z)
                                                               : Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y - 20, transform.eulerAngles.z);
+
+        //暗号論的疑似乱数
+        using (RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider())
+        {
+            byte[] nonce = new byte[sizeof(int)];
+
+            rng.GetBytes(nonce);
+            XorShift = BitConverter.ToUInt32(nonce, 0);
+        }
     }
 
     /// <summary>デバック用</summary>
     public void DebugView()
     {
         if (obj != null) {
-           Debug.Log(obj.gameObject.GetComponent<CardInformation>().number);
+            Debug.Log(obj.gameObject.GetComponent<CardInformation>().number);
         }
     }
 
@@ -177,6 +189,17 @@ public class PlayerContller : MonoBehaviour
     #endregion
 
     #region ターンが回ってきたときの処理
+    float ThinkingTime()
+    {
+        float time = 0.5f;
+        if (haveCard.Count <= 4)
+            time += 1.0f;
+        if (haveCard.Exists(h => h.isJoker == true))
+            time += 2.0f;
+        
+        return time;
+    }
+
     /// <summary>自分のターンの時処理される</summary>
     public void NowSelectCard()
     {
@@ -230,16 +253,18 @@ public class PlayerContller : MonoBehaviour
     /// <summary>CPUがトランプを引く処理</summary>
     public IEnumerator CPUTurn(List<CardInformation> cardInformations)
     {
-        if (diceProbability >= Random.Range(1, 101)) {
+        XorShift = (XorShift + 43) % 367;
+        XorShift %= 100;
+        if (diceProbability >= XorShift) {
             if (canEvent) {
                 gameView.isEvent = true;
                 canEvent = false;
             }
         }
 
-        yield return new WaitForSeconds(Random.Range(1f, 3f));
+        yield return new WaitForSeconds(ThinkingTime());
 
-        StartCoroutine(gameView.ExchangeCard(cardInformations[Random.Range(0, cardInformations.Count)]));
+        StartCoroutine(gameView.ExchangeCard(cardInformations[UnityEngine.Random.Range(0, cardInformations.Count)]));
     }
 
     /// <summary>引いたトランプを手札に追加し、そろっていたら捨てる</summary>

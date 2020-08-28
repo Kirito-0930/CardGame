@@ -90,7 +90,7 @@ public class PlayerContller : MonoBehaviour
     #endregion
 
     #region サイコロイベント処理
-    /// <summary>サイコロを振るボタンを押したとき</summary>
+    /// <summary>サイコロボタンを押したとき</summary>
     public void DiceButton()
     {
         if (canEvent) {
@@ -105,7 +105,10 @@ public class PlayerContller : MonoBehaviour
     {
         if (haveCard.Exists(h => h.isJoker == true))
         {
-
+            diceProbability += 2;
+        }
+        else {
+            diceProbability -= 1;
         }
     }
 
